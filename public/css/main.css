@@ -1,0 +1,25 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #e4dfdf;
+}
+
+.hover:hover {
+  background-color: #0d6efd;
+}
+
+.hover-danger:hover {
+  background-color: rgb(245, 18, 18);
+}
+
+.hover-success:hover {
+  background-color: rgb(5, 145, 5);
+}
+
+.logout:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
