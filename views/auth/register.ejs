@@ -1,0 +1,59 @@
+<%- include('../layouts/head.ejs') %>
+  <link rel="stylesheet" href="/css/form.css">
+</head>
+<body>
+  <main class="main">
+    <div class="signup_background"></div>
+    <div class="container">
+     <div class="row">
+       <% if(errorMessage) { %>
+        <div class="alert alert-danger alert-dismissible fade show w-auto text-center mx-auto mt-3 d-flex" role="alert">
+          <%= errorMessage %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+       <% } %>
+     </div>
+       <div class="row">
+         <div class="d-flex justify-content-center mb-5">
+           <div class="form-action bg-dark mt-3">
+             <div class="text-center py-2">
+               <h1 class="text-white text-uppercase">Đăng ký</h1>
+             </div>
+             <form action="/register" method="POST" class="d-flex flex-column justify-content-center" novalidate>
+               <div class="mb-3 px-3">
+                 <label for="email" class="form-label text-white">Tài Khoản</label>
+                 <input type="email" class="form-control <%= validationErrors.find(e => e.path === 'email') ? 'invalid' : '' %>" name="email" id="email" placeholder="example@gmail.com" value="<%= oldInput.email %>">
+               </div>
+
+               <div class="mb-3 px-3">
+                 <label for="password" class="form-label text-white">Mật khẩu</label>
+                 <input type="password" class="form-control <%= validationErrors.find(e => e.path === 'password') ? 'invalid' : '' %>" name="password" id="password" placeholder="Mật khẩu ít nhất 6 chữ số" value="<%= oldInput.password %>">
+               </div>
+
+               <div class="mb-3 px-3">
+                <label for="confirmPassword" class="form-label text-white">Nhập lại mật khẩu</label>
+                <input type="password" class="form-control <%= validationErrors.find(e => e.path === 'confirmPassword') ? 'invalid' : '' %>" name="confirmPassword" id="confirmPassword" placeholder="Nhập lại mật khẩu" value="<%= oldInput.confirmPassword %>">
+              </div>
+
+              <div class="mb-3 px-3">
+                <label for="name" class="form-label text-white">Họ Tên</label>
+                <input type="text" class="form-control <%= validationErrors.find(e => e.path === 'name') ? 'invalid' : '' %>" name="name" id="name" placeholder="Trinh Tran Phuong Tuan" value="<%= oldInput.name %>">
+              </div>
+
+              <div class="mb-3 px-3">
+                <label for="address" class="form-label text-white">Địa chỉ</label>
+                <input type="text" class="form-control <%= validationErrors.find(e => e.path === 'address') ? 'invalid' : '' %>" name="address" id="address" placeholder="Ben Tre" value="<%= oldInput.address %>">
+              </div>
+
+              <div class="mb-3 px-3">
+                <label for="phone" class="form-label text-white">Số điện thoại</label>
+                <input type="text" class="form-control <%= validationErrors.find(e => e.path === 'phone') ? 'invalid' : '' %>" name="phone" id="phone" placeholder="03154xxxx" value="<%= oldInput.phone %>">
+              </div>
+
+               <button type="submit" class="my_btn border text-white my-3 align-self-center">Đăng ký</button>
+             </form>
+       </div>
+         </div>
+    </div>
+</main>
+<%- include('../layouts/end.ejs') %>

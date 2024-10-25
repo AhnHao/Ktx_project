@@ -1,0 +1,129 @@
+<%- include('../layouts/head.ejs') %>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row bg-dark">
+      <div class="col-md-2 g-0 text-center">
+        <img 
+          src="/image/Logo_Dai_hoc_Can_Tho.svg.png" 
+          alt="logo"
+          height="75px"
+          class="mt-1"
+        >
+      </div>
+      <div class="col-md-10 g-0">
+        <div class="w-100 h-auto py-3 text-uppercase text-center text-white">
+          <h3>Hệ thống quản lý ký túc xá</h3>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <!-- sidebar -->
+      <div class="col-md-2 g-0">
+        <%- include('../layouts/sidebar.ejs') %>
+      </div>
+
+      <!-- main -->
+      <div class="col-md-7 border-end border-black" style="position: relative;">
+        <% if(successMessage) { %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 0; z-index: 1000;">
+            <h4><%= successMessage %></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+        <h3 class="text-center my-2 text-uppercase">Danh sách phòng</h3>
+        <div class="border border-black" style="max-height: 80vh; overflow-y: auto;">
+          <table class="table table-hover table-bordered text-center">
+            <thead class="position-sticky" style="top: 0; z-index: 900;">
+              <tr>
+                <th scope="col">Mã phòng</th>
+                <th scope="col">Tên phòng</th>
+                <th scope="col">Diện tích (m<sup>2</sup>)</th>
+                <th scope="col">Số giường</th>
+                <th scope="col">Giá thuê</th>
+                <th scope="col">Loại phòng</th>
+                <th scope="col">Sửa/Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% allRooms.forEach(room => { %>
+                <tr>
+                  <td><%= room.MaPhong %></td>
+                  <td><%= room.TenPhong %></td>
+                  <td><%= room.DienTich %></td>
+                  <td><%= room.SoGiuong %></td>
+                  <td><%= (+room.GiaThue).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
+                  <td><%= room.PhongNam_Nu %></td>
+                  <td>
+                    <form action="/delete-room" method="POST">
+                      <a href="/edit-room/<%= room.MaPhong %>?edit=true" class="btn border border-black hover-success"><i class="bi bi-pencil-square"></i></a>
+                      <input type="hidden" value="<%= room.MaPhong %>" name="maPhong">
+                      <button type="submit" class="btn border border-black hover-danger">
+                        <i class="bi bi-archive-fill"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <h4 class="text-center mt-2 mb-3 text-uppercase">Thông tin phòng</h4>
+        <form action="/<% if(editing) {%>update-room<% } else {%>add-room<% } %>" method="POST">
+          <div class="row mb-3">
+            <label for="maPhong" class="col-sm-4">Mã phòng</label>
+            <div class="col-md-8">
+              <input type="text" id="maPhong" required name="maPhong" value="<% if(editing) { %><%= editRoom.MaPhong %><% } %>">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="tenPhong" class="col-sm-4">Tên phòng</label>
+            <div class="col-md-8">
+              <input type="text" id="tenPhong" required name="tenPhong" value="<% if(editing) { %><%= editRoom.TenPhong %><% } %>">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="dienTich" class="col-sm-4">Diện tích</label>
+            <div class="col-md-8">
+              <input type="number" min="1" max="30" id="dienTich" required name="dienTich" value="<% if(editing) { %><%= editRoom.DienTich %><% } %>">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="soGiuong" class="col-sm-4">Số giường</label>
+            <div class="col-md-8">
+              <input type="number" min="1" max="10" id="soGiuong" required name="soGiuong" value="<% if(editing) { %><%= editRoom.SoGiuong %><% } %>">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="giaThue" class="col-sm-4">Giá thuê</label>
+            <div class="col-md-8">
+              <input type="number" min="1" id="giaThue" required name="giaThue" value="<% if(editing) { %><%= (+editRoom.GiaThue) %><% } %>">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="phongNamNu" class="col-sm-4">Loại phòng</label>
+            <div class="col-md-8">
+              <select id="phongNamNu" required name="phongNamNu">
+                <option value="M" <% if(editing && editRoom.PhongNam_Nu == 'M') { %>selected<% } %>>Nam</option>
+                <option value="F" <% if(editing && editRoom.PhongNam_Nu == 'F') { %>selected<% } %>>Nữ</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary"><% if(editing) { %>Cập nhật<% } else { %>Thêm<% } %></button>
+        </form>
+
+        <!-- <div class="tool border-top border-black mt-3">
+          <h5 class="text-center mt-2 mb-3 text-uppercase">Lọc phòng</h5>
+          <form action="" class="mt-2">
+            <label for="searchMaPhong" class="mb-3"></label>
+            <input type="text" name="searchMaPhong" id="searchMaPhong">
+          </form>
+        </div> -->
+      </div>
+    </div>
+  </div>
+<%- include('../layouts/end.ejs') %>
