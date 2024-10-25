@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs')
 const { validationResult } = require('express-validator')
 
 exports.getLogin = (req, res, next) => {
-  let successMessage = req.flash('success');
   let message = req.flash('error')
   if (message.length > 0) {
     message = message[0]
@@ -14,7 +13,6 @@ exports.getLogin = (req, res, next) => {
     pageTitle: 'Login',
     path: '/login',
     errorMessage: message,
-    successMessage: successMessage.length > 0 ? successMessage[0] : null,
     oldInput: {
       email: '',
       password: ''
