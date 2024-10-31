@@ -1,0 +1,199 @@
+<%- include('../layouts/head.ejs') %>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <!-- Header -->
+      <div class="row bg-dark">
+        <div class="col-md-2 g-0 text-center">
+          <img src="/image/Logo_Dai_hoc_Can_Tho.svg.png" alt="logo" height="75px" class="mt-1">
+        </div>
+        <div class="col-md-10 g-0">
+          <div class="w-100 h-auto py-3 text-uppercase text-center text-white">
+            <h3>Hệ thống quản lý ký túc xá</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 g-0">
+          <%- include('../layouts/sidebar.ejs') %>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-7 border-black border-end" style="position: relative; max-height: 90vh; overflow-y: auto;">
+          <div class="w-100 h-auto py-3 text-uppercase text-center">
+            <h3>Danh sách thanh toán</h3>
+          </div>
+
+          <!-- Payment List Table -->
+          <table class="table table-hover table-bordered text-center">
+            <thead class="position-sticky" style="top: 0; z-index: 900;">
+              <tr>
+                <th scope="col">Mã hợp đồng</th>
+                <th scope="col">Tháng/Năm</th>
+                <th scope="col">Số tiền</th>
+                <th scope="col">Ngày thanh toán</th>
+                <th scope="col">Mã nhân viên</th>
+                <th scope="col">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (allPayments && allPayments.length> 0) { %>
+                <% allPayments.forEach(function(payment) { %>
+                  <tr>
+                    <td>
+                      <%= payment.MaHopDong %>
+                    </td>
+                    <!-- Format ThangNam -->
+                    <td>
+                      <%= new Date(payment.ThangNam).toLocaleDateString('vi-VN', { day: '2-digit' , month: '2-digit' ,
+                        year: 'numeric' }) %>
+                    </td>
+                    <td>
+                      <%= (+payment.SoTien).toLocaleString('vi-VN', { style: 'currency' , currency: 'VND' }) %>
+                    </td>
+                    <!-- Format NgayThanhToan -->
+                    <td>
+                      <%= payment.NgayThanhToan ? new Date(payment.NgayThanhToan).toLocaleDateString('vi-VN', {
+                        day: '2-digit' , month: '2-digit' , year: 'numeric' }) : 'Chưa thanh toán' %>
+                    </td>
+                    <td>
+                      <%= payment.MaNhanVien %>
+                    </td>
+                    <td>
+                      <a href="/payment/edit-payment/<%= payment.MaHopDong %>?edit=true"
+                        class="btn border border-black hover-success"><i class="bi bi-pencil-square"></i></a>
+                      <form action="/payment/delete-payment/<%= payment.MaHopDong %>" method="POST"
+                        style="display:inline;">
+                        <button type="submit" class="btn border border-black hover-danger">
+                          <i class="bi bi-archive-fill"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  <% }) %>
+                    <% } else { %>
+                      <tr>
+                        <td colspan="6">Không có dữ liệu thanh toán</td>
+                      </tr>
+                      <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Sidebar for Search and Add/Edit Payment Forms -->
+        <div class="col-md-3">
+          <!-- Payment Search Form -->
+          <div class="tool border-bottom border-black pb-3">
+            <h5 class="text-center mt-2 mb-3 text-uppercase">Tìm kiếm thanh toán</h5>
+            <form action="/payment/search" id="search-form" method="GET" class="mt-2">
+              <div class="row mb-3">
+                <label for="MaHopDongSearch" class="col-sm-4">Mã hợp đồng</label>
+                <div class="col-md-8">
+                  <input type="text" id="MaHopDongSearch" name="MaHopDongSearch"
+                    value="<%= (searchPayment && searchPayment.MaHopDongSearch) || '' %>"
+                    onclick="document.getElementById('MaSoSinhVien').value = ''">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label for="MaSoSinhVien" class="col-sm-4">Mã số sinh viên</label>
+                <div class="col-md-8">
+                  <input type="text" id="MaSoSinhVien" name="MaSoSinhVien"
+                    value="<%= (searchPayment && searchPayment.MaSoSinhVien) || '' %>"
+                    onclick="document.getElementById('MaHopDongSearch').value = ''">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-secondary w-100">Tìm kiếm</button>
+            </form>
+          </div>
+
+          <!-- Payment Add/Edit Form -->
+          <h4 class="text-center mt-2 mb-3 text-uppercase">Thông tin thanh toán</h4>
+          <form id="paymentForm" action="/payment/<%= editing ? 'update-payment' : 'add-payment' %>" method="POST"
+            onsubmit="validateForm()">
+            <div class="row mb-3">
+              <label for="MHD" class="col-sm-4">Mã hợp đồng</label>
+              <div class="col-md-8">
+                <input type="text" id="MHD" name="MDH" readonly class="form-control-plaintext"
+                  value="<%= editing && editTT_ThuePhong && editTT_ThuePhong.MaHopDong ? editTT_ThuePhong.MaHopDong : '' %>">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="ThangNam" class="col-sm-4">Tháng/Năm</label>
+              <div class="col-md-8">
+                <input type="date" id="ThangNam" name="ThangNam" required
+                  value="<%= editing && editTT_ThuePhong ? new Date(editTT_ThuePhong.ThangNam).toISOString().split('T')[0] : '' %>">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="SoTien" class="col-sm-4">Số tiền</label>
+              <div class="col-md-8">
+                <input type="number" id="SoTien" name="SoTien" required
+                  value="<%= editing && editTT_ThuePhong ? editTT_ThuePhong.SoTien : '' %>">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="NgayThanhToan" class="col-sm-4">Ngày thanh toán</label>
+              <div class="col-md-8">
+                <input type="date" id="NgayThanhToan" name="NgayThanhToan"
+                  value="<%= editing && editTT_ThuePhong ? new Date(editTT_ThuePhong.NgayThanhToan).toISOString().split('T')[0] : '' %>">
+                <button type="button" class="btn btn-success btn-sm ms-2"
+                  onclick="document.getElementById('NgayThanhToan').value = new Date().toISOString().split('T')[0];">
+                  <i class="bi bi-calendar2-check"></i>
+                </button>
+                <button type="button" class="btn btn-danger btn-sm ms-2"
+                  onclick="document.getElementById('NgayThanhToan').value = null;">
+                  <i class="bi bi-calendar2-x"></i>
+                </button>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="MaNhanVien" class="col-sm-4">Mã nhân viên</label>
+              <div class="col-md-8">
+                <input type="text" id="MaNhanVien" name="MaNhanVien" required
+                  value="<%= editing && editTT_ThuePhong ? editTT_ThuePhong.MaNhanVien : '' %>">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+              <%= editing ? 'Cập nhật' : 'Thêm' %>
+            </button>
+          </form>
+
+          <!-- Notification Messages -->
+          <% if (successMessage !='' ) { %>
+            <div class="alert alert-success mt-3">
+              <%= successMessage %>
+            </div>
+            <% } %>
+
+              <% if (errorMessage !='' ) { %>
+                <div class="alert alert-danger mt-3">
+                  <%= errorMessage %>
+                </div>
+                <% } %>
+                
+
+        </div>
+      </div>
+    </div>
+    <script>
+      function validateForm() {
+        const thangNam = document.getElementById('ThangNam').value;
+        const soTien = document.getElementById('SoTien').value;
+        const maNhanVien = document.getElementById('MaNhanVien').value;
+
+        let missingFields = [];
+        if (!thangNam) missingFields.push('Tháng/Năm');
+        if (!soTien) missingFields.push('Số tiền');
+        if (!maNhanVien) missingFields.push('Mã nhân viên');
+
+        if (missingFields.length > 0) {
+          alert('Vui lòng điền đầy đủ thông tin: ' + missingFields.join(', ') + '.');
+          return false;
+        }
+
+        return true;
+      }
+    </script>
