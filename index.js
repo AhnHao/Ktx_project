@@ -28,9 +28,11 @@ app.set('views', 'views')
 
 const authRoutes = require('./routes/auth')
 const roomRoutes = require('./routes/room')
+const classRoutes = require('./routes/class')
 
 app.use(authRoutes)
 app.use(roomRoutes)
+app.use(classRoutes)
 
 app.listen(PORT, () => {
   console.log('App is running on port 8080')
