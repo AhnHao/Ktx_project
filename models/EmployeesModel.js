@@ -35,6 +35,12 @@ const Employees = {
     const [result] = await db.query(sql, [maNhanVien]);
     return result;
   },
+
+  checkEmployee: async function (maNhanVien) {
+    const sql = 'SELECT * FROM tt_thuephong WHERE maNhanVien = ?'
+    const [result] = await db.query(sql, [maNhanVien])
+    return result
+  }
 };
 
 module.exports = Employees;

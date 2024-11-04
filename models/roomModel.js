@@ -38,6 +38,12 @@ const Room = {
     const [result] = await db.query(sql, [tenPhong, dienTich, soGiuong, giaThue, loaiPhong, maPhong])
     return result
   },
+
+  checkRoom: async function (maPhong) {
+    const sql = 'SELECT * FROM thuephong WHERE maPhong = ?'
+    const [result] = await db.query(sql, [maPhong])
+    return result
+  }
 }
 
 module.exports = Room
