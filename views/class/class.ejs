@@ -1,0 +1,112 @@
+<%- include('../layouts/head.ejs') %>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row bg-dark">
+      <div class="col-md-2 g-0 text-center">
+        <img 
+          src="/image/Logo_Dai_hoc_Can_Tho.svg.png" 
+          alt="logo"
+          height="75px"
+          class="mt-1"
+        >
+      </div>
+      <div class="col-md-10 g-0">
+        <div class="w-100 h-auto py-3 text-uppercase text-center text-white">
+          <h3>Hệ thống quản lý ký túc xá</h3>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <!-- sidebar -->
+      <div class="col-md-2 g-0">
+        <%- include('../layouts/sidebar.ejs') %>
+      </div>
+
+      <!-- main -->
+      <div class="col-md-7 border-end border-black" style="position: relative;">
+        <% if(successMessage) { %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 0; z-index: 1000;">
+            <h4><%= successMessage %></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+        <h3 class="text-center my-2 text-uppercase">Danh sách lớp</h3>
+        <div class="border border-black" style="max-height: 80vh; overflow-y: auto;">
+            <table class="table table-hover table-bordered text-center">
+                <thead class="position-sticky" style="top: 0; z-index: 900;">
+                    <tr>
+                        <th scope="col">Mã lớp</th>
+                        <th scope="col">Tên lớp</th>
+                        <th scope="col">Sửa/Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% allClasses.forEach(cls => { %>
+                        <tr>
+                            <td><%= cls.MaLop %></td>
+                            <td><%= cls.TenLop %></td>
+                            <td>
+                                <form action="/delete-class" method="POST">
+                                    <a href="/edit-class/<%= cls.MaLop %>?edit=true" class="btn border border-black hover-success">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <input type="hidden" value="<%= cls.MaLop %>" name="maLop">
+                                    <button type="submit" class="btn border border-black hover-danger">
+                                        <i class="bi bi-archive-fill"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        
+      </div>
+
+      <div class="col-md-3">
+        <h4 class="text-center mt-2 mb-3 text-uppercase">Thông tin lớp</h4>
+        <form action="/<%= editing ? 'update-class' : 'add-class' %>" method="POST">
+            <div class="row mb-3">
+                <label for="maLop" class="col-sm-4">Mã lớp</label>
+                <div class="col-md-8">
+                    <input type="text" id="maLop" required name="maLop" value="<%= editing ? editClass.MaLop : '' %>">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="tenLop" class="col-sm-4">Tên Lớp</label>
+                <div class="col-md-8">
+                    <input type="text" id="tenLop" required name="tenLop" value="<%= editing ? editClass.TenLop : '' %>">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary"><%= editing ? 'Cập nhật' : 'Thêm' %></button>
+        </form>
+        
+
+        <div class="tool border-top border-black mt-3">
+            <h5 class="text-center mt-2 mb-3 text-uppercase">Lọc lớp</h5>
+            <form action="/search-class" method="GET" class="mt-2">
+                <div class="row">
+                  <div class="col-md-4">
+                    <label for="searchMaLop" class="mb-3">Mã Lớp:</label>
+                  </div>
+                  <div class="col-md-8">
+                    <input type="text" name="searchMaLop" id="searchMaLop" value="<%= searchMaLopQuery %>">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <label for="searchTenLop" class="mb-3">Tên Lớp:</label>
+                  </div>
+                  <div class="col-md-8">
+                    <input type="text" name="searchTenLop" id="searchTenLop" value="<%= searchTenLopQuery %>">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Tìm kiếm</button>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<%- include('../layouts/end.ejs') %>
