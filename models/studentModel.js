@@ -41,6 +41,12 @@ const Student = {
     const [result] = await db.query(sql, [maSinhVien]);
     return result;
   },
+
+  checkStudent: async function (maSinhVien) {
+    const sql = 'SELECT * FROM thuephong WHERE maSinhVien = ?'
+    const [result] = await db.query(sql, [maSinhVien])
+    return result
+  }
 };
 
 module.exports = Student;

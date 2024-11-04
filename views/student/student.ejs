@@ -25,6 +25,12 @@
 
       <!-- main -->
       <div class="col-md-7 border-end border-black" style="position: relative;">
+        <% if(errorMessage) { %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 0; z-index: 1000;">
+            <h4><%= errorMessage %></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
         <% if(successMessage) { %>
           <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 0; z-index: 1000;">
             <h4><%= successMessage %></h4>
