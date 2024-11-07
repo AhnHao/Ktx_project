@@ -58,6 +58,7 @@ exports.getEditStudent = async (req, res, next) => {
       allStudents: allStudents,
       editStudent: editStudent[0],
       editing: editMode,
+      errorMessage: null,
       successMessage: null
     })
   } catch (err) {
