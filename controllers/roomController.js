@@ -59,6 +59,7 @@ exports.getEditRoom = async (req, res, next) => {
       allRooms: allRooms,
       editRoom: editRoom[0],
       editing: editmode,
+      errorMessage: null,
       successMessage: null
     })
   } catch(err) {

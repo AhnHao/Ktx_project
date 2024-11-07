@@ -61,6 +61,7 @@ exports.getEditEmployee = async (req, res, next) => {
       allEmployees: allEmployees,
       editEmployee: editEmployee[0],
       editing: editMode,
+      errorMessage: null,
       successMessage: null
     })
   } catch (err) {
