@@ -1,4 +1,4 @@
-  <%- include('../layouts/head.ejs') %>
+<%- include('../layouts/head.ejs') %>
 </head>
 <body>
   <div class="container-fluid">
@@ -37,33 +37,31 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         <% } %>
-        <h3 class="text-center my-2 text-uppercase">Danh sách phòng</h3>
+        <h3 class="text-center my-2 text-uppercase">Danh sách sinh viên</h3>
         <div class="border border-black" style="max-height: 80vh; overflow-y: auto;">
           <table class="table table-hover table-bordered text-center">
             <thead class="position-sticky" style="top: 0; z-index: 900;">
               <tr>
-                <th scope="col">Mã phòng</th>
-                <th scope="col">Tên phòng</th>
-                <th scope="col">Diện tích (m<sup>2</sup>)</th>
-                <th scope="col">Số giường</th>
-                <th scope="col">Giá thuê</th>
-                <th scope="col">Loại phòng</th>
+                <th scope="col">Mã sinh viên</th>
+                <th scope="col">Họ tên</th>
+                <th scope="col">Số điện thoại</th>
+                <th scope="col">Mã lớp</th>
+                <th scope="col">Giới tính</th>
                 <th scope="col">Sửa/Xóa</th>
               </tr>
             </thead>
             <tbody>
-              <% allRooms.forEach(room => { %>
+              <% allStudents.forEach(student => { %>
                 <tr>
-                  <td><%= room.MaPhong %></td>
-                  <td><%= room.TenPhong %></td>
-                  <td><%= room.DienTich %></td>
-                  <td><%= room.SoGiuong %></td>
-                  <td><%= (+room.GiaThue).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
-                  <td><%= room.PhongNam_Nu %></td>
+                  <td><%= student.MaSinhVien %></td>
+                  <td><%= student.HoTen %></td>
+                  <td><%= student.SoDienThoai %></td>
+                  <td><%= student.MaLop %></td>
+                  <td><%= student.GioiTinh === 'M' ? 'Nam' : 'Nữ' %></td>
                   <td>
-                    <form action="/delete-room" method="POST">
-                      <a href="/edit-room/<%= room.MaPhong %>?edit=true" class="btn border border-black hover-success"><i class="bi bi-pencil-square"></i></a>
-                      <input type="hidden" value="<%= room.MaPhong %>" name="maPhong">
+                    <form action="/delete-student" method="POST">
+                      <a href="/edit-student/<%= student.MaSinhVien %>?edit=true" class="btn border border-black hover-success"><i class="bi bi-pencil-square"></i></a>
+                      <input type="hidden" value="<%= student.MaSinhVien %>" name="maSinhVien">
                       <button type="submit" class="btn border border-black hover-danger">
                         <i class="bi bi-archive-fill"></i>
                       </button>
@@ -77,44 +75,38 @@
       </div>
 
       <div class="col-md-3">
-        <h4 class="text-center mt-2 mb-3 text-uppercase">Thông tin phòng</h4>
-        <form action="/<% if(editing) {%>update-room<% } else {%>add-room<% } %>" method="POST">
+        <h4 class="text-center mt-2 mb-3 text-uppercase">Thông tin sinh viên</h4>
+        <form action="/<% if(editing) {%>update-student<% } else {%>add-student<% } %>" method="POST">
           <div class="row mb-3">
-            <label for="maPhong" class="col-sm-4">Mã phòng</label>
+            <label for="maSinhVien" class="col-sm-4">Mã sinh viên</label>
             <div class="col-md-8">
-              <input type="text" id="maPhong" required name="maPhong" value="<% if(editing) { %><%= editRoom.MaPhong %><% } %>">
+              <input type="text" id="maSinhVien" required name="maSinhVien" value="<% if(editing) { %><%= editStudent.MaSinhVien %><% } %>">
             </div>
           </div>
           <div class="row mb-3">
-            <label for="tenPhong" class="col-sm-4">Tên phòng</label>
+            <label for="hoTen" class="col-sm-4">Họ tên</label>
             <div class="col-md-8">
-              <input type="text" id="tenPhong" required name="tenPhong" value="<% if(editing) { %><%= editRoom.TenPhong %><% } %>">
+              <input type="text" id="hoTen" required name="hoTen" value="<% if(editing) { %><%= editStudent.HoTen %><% } %>">
             </div>
           </div>
           <div class="row mb-3">
-            <label for="dienTich" class="col-sm-4">Diện tích</label>
+            <label for="soDienThoai" class="col-sm-4">Số điện thoại</label>
             <div class="col-md-8">
-              <input type="number" min="1" max="30" id="dienTich" required name="dienTich" value="<% if(editing) { %><%= editRoom.DienTich %><% } %>">
+              <input type="text" id="soDienThoai" required name="soDienThoai" value="<% if(editing) { %><%= editStudent.SoDienThoai %><% } %>">
             </div>
           </div>
           <div class="row mb-3">
-            <label for="soGiuong" class="col-sm-4">Số giường</label>
+            <label for="maLop" class="col-sm-4">Mã lớp</label>
             <div class="col-md-8">
-              <input type="number" min="1" max="10" id="soGiuong" required name="soGiuong" value="<% if(editing) { %><%= editRoom.SoGiuong %><% } %>">
+              <input type="text" id="maLop" required name="maLop" value="<% if(editing) { %><%= editStudent.MaLop %><% } %>">
             </div>
           </div>
           <div class="row mb-3">
-            <label for="giaThue" class="col-sm-4">Giá thuê</label>
+            <label for="gioiTinh" class="col-sm-4">Giới tính</label>
             <div class="col-md-8">
-              <input type="number" min="1" id="giaThue" required name="giaThue" value="<% if(editing) { %><%= (+editRoom.GiaThue) %><% } %>">
-            </div>
-          </div>
-          <div class="row mb-3">
-            <label for="phongNamNu" class="col-sm-4">Loại phòng</label>
-            <div class="col-md-8">
-              <select id="phongNamNu" required name="phongNamNu">
-                <option value="M" <% if(editing && editRoom.PhongNam_Nu == 'M') { %>selected<% } %>>Nam</option>
-                <option value="F" <% if(editing && editRoom.PhongNam_Nu == 'F') { %>selected<% } %>>Nữ</option>
+              <select id="gioiTinh" required name="gioiTinh">
+                <option value="M" <% if(editing && editStudent.GioiTinh === 'M') { %>selected<% } %>>Nam</option>
+                <option value="F" <% if(editing && editStudent.GioiTinh === 'F') { %>selected<% } %>>Nữ</option>
               </select>
             </div>
           </div>

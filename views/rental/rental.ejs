@@ -1,0 +1,238 @@
+<%- include('../layouts/head.ejs') %>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row bg-dark">
+      <div class="col-md-2 g-0 text-center">
+        <img 
+          src="/image/Logo_Dai_hoc_Can_Tho.svg.png" 
+          alt="logo"
+          height="75px"
+          class="mt-1"
+        >
+      </div>
+      <div class="col-md-10 g-0">
+        <div class="w-100 h-auto py-3 text-uppercase text-center text-white">
+          <h3>Hệ thống quản lý ký túc xá</h3>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <!-- sidebar -->
+      <div class="col-md-2 g-0">
+        <%- include('../layouts/sidebar.ejs') %>
+      </div>
+
+      <!-- main -->
+      <div class="col-md-7 border-end border-black" style="position: relative;">
+        <% if(successMessage) { %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 0; z-index: 1000;">
+            <h4><%= successMessage %></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+        <h3 class="text-center my-2 text-uppercase">Danh sách thuê phòng</h3>
+        <div class="border border-black" style="max-height: 80vh; overflow-y: auto;">
+          <table class="table table-hover table-bordered text-center">
+            <thead class="position-sticky" style="top: 0; z-index: 900;">
+              <tr>
+                <th scope="col">Mã hợp đồng</th>
+                <th scope="col">Mã sinh viên</th>
+                <th scope="col">Mã phòng</th>
+                <th scope="col">Bắt đầu</th>
+                <th scope="col">Kết thúc</th>
+                <th scope="col">Tiền đặt cọc</th>
+                <th scope="col">Giá thuê thực tế</th>
+                <th scope="col">Sửa/Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% allRentals.forEach(rental => { %>
+                <tr>
+                  <td><%= rental.MaHopDong %></td>
+                  <td><%= rental.MaSinhVien %></td>
+                  <td><%= rental.MaPhong %></td>
+                  <td><%= new Date(rental.BatDau).toLocaleDateString('vi-VN', {
+                        day: '2-digit' , month: '2-digit' , year: 'numeric' }) %></td>
+                  <td><%= new Date(rental.KetThuc).toLocaleDateString('vi-VN', {
+                        day: '2-digit' , month: '2-digit' , year: 'numeric' }) %></td>
+                  <td><%= (+rental.TienDatCoc).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
+                  <td><%= (+rental.GiaThueThucTe).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
+                  <td>
+                    <form action="/delete-rental" method="POST">
+                      <a href="/edit-rental/<%= rental.MaHopDong %>?edit=true" class="btn border border-black hover-success"><i class="bi bi-pencil-square"></i></a>
+                      <input type="hidden" value="<%= rental.MaHopDong %>" name="maHopDong">
+                      <button type="submit" class="btn border border-black hover-danger">
+                        <i class="bi bi-archive-fill"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs" id="rentalTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link <%= (searchMaHopDong || searchMaSinhVien || searchMaPhong) ? '' : 'active' %>" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="<%= (searchMaHopDong || searchMaSinhVien || searchMaPhong) ? 'false' : 'true' %>">
+              Quản lý thuê phòng
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link <%= (searchMaHopDong || searchMaSinhVien || searchMaPhong) ? 'active' : '' %>" id="filter-tab" data-bs-toggle="tab" data-bs-target="#filter" type="button" role="tab" aria-controls="filter" aria-selected="<%= (searchMaHopDong || searchMaSinhVien || searchMaPhong) ? 'true' : 'false' %>">
+              Lọc thuê phòng
+            </button>
+          </li>
+        </ul>
+      
+        <!-- Tab Content -->
+        <div class="tab-content" id="rentalTabsContent">
+          <!-- Tab for Rental Information -->
+          <div class="tab-pane fade <%= (searchMaHopDong || searchMaSinhVien || searchMaPhong) ? '' : 'show active' %>" id="info" role="tabpanel" aria-labelledby="info-tab">
+            <form action="/<%= editing ? 'update-rental' : 'add-rental' %>" method="POST" class="container p-4 border-top border-black mt-3">
+              <!-- Nội dung form thông tin thuê phòng -->
+              <!-- Giữ nguyên mã phần form nhập liệu thông tin thuê phòng từ mã hợp đồng, mã sinh viên, mã phòng, đến các trường khác -->
+              <div class="row mb-3">
+                <label for="maHopDong" class="col-sm-4">Mã hợp đồng</label>
+                <div class="col-sm-8">
+                  <input type="text" id="maHopDong" required name="maHopDong" class="form-control" value="<% if(editing) { %><%= editRental.MaHopDong %><% } %>">
+                </div>
+              </div>
+            
+              <div class="row mb-3">
+                <label for="maSinhVien" class="col-sm-4 ">Mã sinh viên</label>
+                <div class="col-sm-8">
+                  <select id="maSinhVien" required name="maSinhVien" class="form-select">
+                    <option value="" selected>--Chọn mã sinh viên--</option>
+                    <% allStudents.forEach(student => { %>
+                      <option value="<%= student.MaSinhVien %>" <%= editing && editRental.MaSinhVien === student.MaSinhVien ? 'selected' : '' %>>
+                        <%= student.MaSinhVien %> - <%= student.HoTen %>
+                      </option>
+                    <% }) %>
+                  </select>
+                </div>
+              </div>
+            
+              <div class="row mb-3">
+                <label for="maPhong" class="col-sm-4 ">Mã phòng</label>
+                <div class="col-sm-8">
+                  <select id="maPhong" required name="maPhong" class="form-select">
+                    <option value="" selected>--Chọn mã phòng--</option>
+                    <% allRooms.forEach(room => { %>
+                      <option value="<%= room.MaPhong %>" <%= editing && editRental.MaPhong === room.MaPhong ? 'selected' : '' %>>
+                        <%= room.MaPhong %> - <%= room.TenPhong %>
+                      </option>
+                    <% }) %>
+                  </select>
+                </div>
+              </div>
+            
+              <div class="row mb-3">
+                <label for="batDau" class="col-sm-4 ">Bắt đầu</label>
+                <div class="col-sm-8 d-flex">
+                  <div class="row">
+                    <div class="col">
+                      <input type="date" id="batDau" required name="batDau" class="form-control"
+                          value="<%= editing ? new Date(new Date(editRental.BatDau).setHours(12)).toISOString().split('T')[0] : '' %>">
+                    </div>
+                    <div class="col mt-md-2">
+                      <button type="button" class="btn btn-success ms-2" onclick="document.getElementById('batDau').value = new Date().toISOString().split('T')[0];">
+                        <i class="bi bi-calendar-check"></i>
+                      </button>
+                      <button type="button" class="btn btn-danger ms-2" 
+                        onclick="document.getElementById('batDau').value = null;">
+                        <i class="bi bi-calendar-x"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="row mb-3">
+                <label for="ketThuc" class="col-sm-4 ">Kết thúc</label>
+                <div class="col-sm-8 d-flex">
+                  <div class="row">
+                    <div class="col">
+                      <input type="date" id="ketThuc" required name="ketThuc" class="form-control"
+                          value="<%= editing ? new Date(new Date(editRental.KetThuc).setHours(12)).toISOString().split('T')[0] : '' %>">
+                    </div>
+                    <div class="col mt-md-2">
+                      <button type="button" class="btn btn-success ms-2" 
+                          onclick="document.getElementById('ketThuc').value = new Date().toISOString().split('T')[0];">
+                        <i class="bi bi-calendar-check"></i>
+                      </button>
+                      <button type="button" class="btn btn-danger ms-2" 
+                              onclick="document.getElementById('ketThuc').value = null;">
+                        <i class="bi bi-calendar-x"></i>
+                      </button>
+                    </div>
+                  </div> 
+                </div>
+              </div>
+            
+              <div class="row mb-3">
+                <label for="tienDatCoc" class="col-sm-4 ">Tiền đặt cọc</label>
+                <div class="col-sm-8">
+                  <input type="number" min="1" id="tienDatCoc" required name="tienDatCoc" class="form-control" 
+                         value="<% if(editing) { %><%= editRental.TienDatCoc %><% } %>">
+                </div>
+              </div>
+            
+              <div class="row mb-3">
+                <label for="giaThueThucTe" class="col-sm-4 ">Giá thuê thực tế</label>
+                <div class="col-sm-8">
+                  <input type="number" min="1" id="giaThueThucTe" required name="giaThueThucTe" class="form-control" 
+                         value="<% if(editing) { %><%= editRental.GiaThueThucTe %><% } %>">
+                </div>
+              </div>
+            
+              <div class="d-flex ">
+                <button type="submit" class="btn btn-primary">
+                  <% if(editing) { %>Cập nhật<% } else { %>Thêm<% } %>
+                </button>
+                <button type="reset" class="btn btn-danger ms-2">Huỷ</button>
+              </div>
+            </form>
+          </div>
+      
+          <!-- Tab for Filter Information -->
+          <div class="tab-pane fade <%= (searchMaHopDong || searchMaSinhVien || searchMaPhong) ? 'show active' : '' %>" id="filter" role="tabpanel" aria-labelledby="filter-tab">
+            <div class="tool border-top border-black mt-3">
+              <form action="/search-rental" class="mt-2 p-4">
+                <!-- Nội dung form lọc thông tin thuê phòng -->
+                <!-- Giữ nguyên mã phần form lọc mã hợp đồng, mã sinh viên, và mã phòng -->
+                <div class="row"> 
+                  <label for="searchMaHopDong" class="mb-3 col-sm-4">Mã hợp đồng</label>
+                  <div class="col-sm-8">
+                    <input type="text" name="searchMaHopDong" class="form-control" id="searchMaHopDong" value="<%= searchMaHopDong %>">
+                  </div>
+                </div>
+                <div class="row">
+                    <label for="searchMaSinhVien" class="mb-3 col-sm-4">Mã sinh viên</label>
+                  <div class="col-sm-8">
+                    <input type="text" name="searchMaSinhVien" class="form-control" id="searchMaSinhVien" value="<%= searchMaSinhVien %>">
+                  </div>
+                </div>
+                <div class="row">
+                  <label for="searchMaPhong" class="mb-3 col-sm-4">Mã phòng</label>
+                  <div class="col-sm-8">
+                    <input type="text" name="searchMaPhong" class="form-control" id="searchMaPhong" value="<%= searchMaPhong  %>">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Lọc</button>
+                <button type="reset" class="btn btn-danger ms-md-2">Huỷ</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+<%- include('../layouts/end.ejs') %>

@@ -279,7 +279,7 @@ CREATE PROCEDURE delete_tt_thuephong(IN p_MaHopDong VARCHAR(10))
 BEGIN
     START TRANSACTION;
         DELETE FROM TT_ThuePhong WHERE MaHopDong = p_MaHopDong;
-        DELETE FROM TT_ThuePhong WHERE MaHopDong = p_MaHopDong;
+        DELETE FROM Phong WHERE MaHopDong = p_MaHopDong;
     COMMIT;
 END //
 
