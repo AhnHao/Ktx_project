@@ -2,7 +2,7 @@ const db = require('../config/database')
 
 const Room = {
   getAllrooms: async function () {
-    const sql = 'SELECT * FROM phong'
+    const sql = 'SELECT p.*, (p.SoGiuong - COUNT(tp.MaHopDong)) AS GiuongConLai FROM phong p LEFT JOIN thuephong tp ON p.MaPhong = tp.MaPhong GROUP BY p.MaPhong'
     const [result] = await db.query(sql)
     return result
   },
@@ -45,9 +45,9 @@ const Room = {
     return result
   },
 
-  filterRoom: async function (maPhong, tenPhong, dienTich, soGiuong, giaThue, loaiPhong) {
-    const sql = 'SELECT * FROM phong WHERE MaPhong LIKE ? AND TenPhong LIKE ? AND DienTich LIKE ? AND SoGiuong LIKE ? AND GiaThue LIKE ? AND PhongNam_Nu = ?'
-    const [result] = await db.query(sql, [`%${searchMaHopDong}%`, `%${searchMaSinhVien}%`, `%${searchMaPhong}%`])
+  searchRoom: async function (maPhong, tenPhong) {
+    const sql = 'SELECT * FROM phong WHERE MaPhong LIKE ? AND TenPhong LIKE ?'
+    const [result] = await db.query(sql, [`%${maPhong}%`, `%${tenPhong}%`])
     return result
   }
 }

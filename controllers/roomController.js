@@ -83,3 +83,22 @@ exports.updateRoom = async(req, res, next) => {
     console.log(err)
   }
 }
+
+exports.searchRoom = async(req, res, next) => {
+  const maPhong = req.body.maPhong
+  const tenPhong = req.body.tenPhong
+
+  try {
+    const rooms = await Room.searchRoom(maPhong, tenPhong)
+    res.render('room/room', {
+      pageTitle: 'Room',
+      path: '/room',
+      allRooms: rooms,
+      errorMessage: null,
+      successMessage: null,
+      editing: false
+    })
+  } catch(err) {
+    console.log(err)
+  }
+}

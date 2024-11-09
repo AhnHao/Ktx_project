@@ -57,7 +57,7 @@
                   <td><%= room.MaPhong %></td>
                   <td><%= room.TenPhong %></td>
                   <td><%= room.DienTich %></td>
-                  <td><%= room.SoGiuong %></td>
+                  <td><%= room.GiuongConLai %>/<%= room.SoGiuong %></td>
                   <td><%= (+room.GiaThue).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
                   <td><%= room.PhongNam_Nu %></td>
                   <td>
@@ -119,6 +119,24 @@
             </div>
           </div>
           <button type="submit" class="btn btn-primary"><% if(editing) { %>Cập nhật<% } else { %>Thêm<% } %></button>
+        </form>
+
+        <hr class="my-3" style="border: 1px solid black; width: 100%; margin: auto;">
+        <h4 class="text-center mt-2 mb-3 text-uppercase">Tìm kiếm phòng</h4>
+        <form action="/search-room" method="POST">
+          <div class="row mb-3">
+            <label for="maPhong" class="col-sm-4">Mã phòng</label>
+            <div class="col-md-8">
+              <input type="text" id="maPhong" required name="maPhong">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="tenPhong" class="col-sm-4">Tên phòng</label>
+            <div class="col-md-8">
+              <input type="text" id="tenPhong" name="tenPhong">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Tìm</button>
         </form>
       </div>
     </div>

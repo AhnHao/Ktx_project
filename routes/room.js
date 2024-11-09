@@ -7,6 +7,8 @@ const isAuth = require('../middleware/isAuth')
 
 router.get('/room', isAuth, roomController.getAllRooms)
 
+router.post('/search-room', isAuth, roomController.searchRoom)
+
 router.post('/add-room', isAuth, roomController.addRoom)
 
 router.post('/delete-room', isAuth, roomController.deleteRoom)
