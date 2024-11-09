@@ -37,22 +37,10 @@ const TT_ThuePhong = {
     }
   },
 
-  // Kiểm tra tình trạng thanh toán của sinh viên
-  checkStudentPaymentStatusById: async function (studentID) {
-    try {
-      const sql = 'CALL check_student_payment_status(?)';
-      const [result] = await db.query(sql, [studentID]);
-      return result[0];
-    } catch (error) {
-      console.error('Error checking student payment status:', error);
-      throw error;
-    }
-  },
-
   // Thêm bản ghi mới vào TT_ThuePhong
   addPaymentRecord: async function (contractID, thangNam, soTien, ngayThanhToan, maNhanVien) {
     try {
-      const sql = 'CALL add_tt_thuephong(?, ?, ?, ?, ?)';
+      const sql = 'CALL add_tt_thuephong(?, ?, ?, ?)';
       const [result] = await db.query(sql, [
         contractID,
         thangNam,
