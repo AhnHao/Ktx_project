@@ -1,5 +1,7 @@
 const Room = require('../models/roomModel')
-
+const Rental = require('../models/rentalModel')
+const Utility = require('../models/utilityModel')
+const Class = require('../models/classModel')
 exports.getAllRooms = async (req, res, next) => {
   let successMessage = req.flash('success')
   let errorMessage = req.flash('error')
@@ -102,3 +104,34 @@ exports.searchRoom = async(req, res, next) => {
     console.log(err)
   }
 }
+exports.getRoomInfo = async (req, res, next) => {
+
+  try{
+    const student = req.session.student ? req.session.student[0] : null;
+    if(!student){
+      req.flash('error', 'Vui lòng đăng nhập trước!');
+      return res.redirect('/loginstudent');
+    }
+    const MaSinhVien = student.MaSinhVien;
+    const rental = await Rental.getRentalByMSSV(MaSinhVien);
+    const room = await Room.getRoomByMaPhong(rental[0].MaPhong);
+    const utilities = await Utility.getUtilityByMaPhong(rental[0].MaPhong);
+    const className = await Class.getClassName(student.MaLop);
+    res.render('room/roominfo', {
+      pageTitle: 'Room Info',
+      path: '/roominfo',
+      errorMessage: null,
+      successMessage: null,
+      student: student,
+      className: className,
+      room: room[0],
+      rental: rental[0],
+      utilities: utilities,
+      editing: false
+    });
+  }
+  catch(err){
+    console.log(err)
+  }
+  
+};

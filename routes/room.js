@@ -17,4 +17,6 @@ router.get('/edit-room/:maPhong', isAuth, roomController.getEditRoom)
 
 router.post('/update-room', isAuth, roomController.updateRoom)
 
+router.get('/roominfo', roomController.getRoomInfo)
+
 module.exports = router

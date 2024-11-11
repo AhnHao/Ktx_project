@@ -1,0 +1,32 @@
+<%- include('../layouts/head.ejs') %>
+<link rel="stylesheet" href="/css/form.css">
+</head>
+<body>
+  <main class="main">
+    <!-- <div class="login_background"></div> -->
+       <div class="container">
+        <div class="row">
+          <% if(errorMessage) { %>
+            <div class="user-message user-message--error mt-3"><%= errorMessage %></div>
+          <% } %>
+        </div>
+        <div class="row">
+          <div class="d-flex justify-content-center">
+            <div class="form-action mt-5">
+              <div class="text-center py-3 my-2 text-white">
+                <h3 class=" text-uppercase">Xem thông tin phòng</h3>
+                <p>Hãy nhập vào mssv để xem thông tin phòng ở của bạn</p>
+              </div>
+              <form action="/loginstudent" method="POST" class="d-flex flex-column justify-content-center" novalidate>
+                <div class="mb-4 px-4">
+                  <label for="MaSinhVien" class="form-label text-white">Mã số sinh viên</label>
+                  <input type="text" class="form-control <%= validationErrors.find(e => e.path === 'mssv') ? 'invalid' : '' %>" name="MaSinhVien" id="MaSinhVien" placeholder="VD: B2105553" value="<%= oldInput.MaSinhVien %>">
+                </div>
+                <button type="submit" class="my_btn border text-white mb-4 align-self-center">Tìm kiếm</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+  </main>
+<%- include('../layouts/end.ejs') %>

@@ -41,8 +41,7 @@
                 <th scope="col">Mã phòng</th>
                 <th scope="col">Bắt đầu</th>
                 <th scope="col">Kết thúc</th>
-                <th scope="col">Tiền đặt cọc</th>
-                <th scope="col">Giá thuê thực tế</th>
+                <th scope="col">Giá</th>
                 <th scope="col">Sửa/Xóa</th>
               </tr>
             </thead>
@@ -56,8 +55,7 @@
                         day: '2-digit' , month: '2-digit' , year: 'numeric' }) %></td>
                   <td><%= new Date(rental.KetThuc).toLocaleDateString('vi-VN', {
                         day: '2-digit' , month: '2-digit' , year: 'numeric' }) %></td>
-                  <td><%= (+rental.TienDatCoc).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
-                  <td><%= (+rental.GiaThueThucTe).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
+                  <td><%= (+rental.Gia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
                   <td>
                     <form action="/delete-rental" method="POST">
                       <a href="/edit-rental/<%= rental.MaHopDong %>?edit=true" class="btn border border-black hover-success"><i class="bi bi-pencil-square"></i></a>
@@ -175,19 +173,12 @@
                 </div>
               </div>
             
-              <div class="row mb-3">
-                <label for="tienDatCoc" class="col-sm-4 ">Tiền đặt cọc</label>
-                <div class="col-sm-8">
-                  <input type="number" min="1" id="tienDatCoc" required name="tienDatCoc" class="form-control" 
-                         value="<% if(editing) { %><%= editRental.TienDatCoc %><% } %>">
-                </div>
-              </div>
             
               <div class="row mb-3">
-                <label for="giaThueThucTe" class="col-sm-4 ">Giá thuê thực tế</label>
+                <label for="gia" class="col-sm-4 ">Giá</label>
                 <div class="col-sm-8">
-                  <input type="number" min="1" id="giaThueThucTe" required name="giaThueThucTe" class="form-control" 
-                         value="<% if(editing) { %><%= editRental.GiaThueThucTe %><% } %>">
+                  <input type="number" min="1" id="gia" required name="gia" class="form-control" 
+                      value="<% if(editing) { %><%= editRental.Gia %><% } %>">
                 </div>
               </div>
             

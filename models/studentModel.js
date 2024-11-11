@@ -46,6 +46,16 @@ const Student = {
     const sql = 'SELECT * FROM thuephong WHERE maSinhVien = ?'
     const [result] = await db.query(sql, [maSinhVien])
     return result
+  },
+  findByMSSV: async function (mssv) {
+    const sql = 'SELECT * FROM SinhVien WHERE MaSinhVien = ?'
+    const [result] = await db.query(sql, [mssv])
+    return result
+  },
+  getClassName: async function (maLop) {
+    const sql = 'SELECT TenLop FROM Lop WHERE MaLop = ?'
+    const [result] = await db.query(sql, [maLop])
+    return result
   }
 };
 
