@@ -35,6 +35,12 @@ const Class = {
         const sql = 'SELECT * FROM Lop WHERE MaLop LIKE ? AND TenLop LIKE ?';
         const [result] = await db.query(sql, [`%${searchMaLop}%`, `%${searchTenLop}%`]);
         return result
+    },
+    getClassName: async function (maLop) {
+        const sql = 'SELECT TenLop FROM Lop WHERE MaLop = ?';
+        const [result] = await db.query(sql, [maLop]);
+        return result.length > 0 ? result[0].TenLop : null;
     }
+    
 }
 module.exports = Class

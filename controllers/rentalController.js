@@ -27,10 +27,9 @@ exports.addRental = async (req, res, next) => {
     const MaPhong = req.body.maPhong
     const BatDau = req.body.batDau
     const KetThuc = req.body.ketThuc
-    const TienDatCoc = req.body.tienDatCoc
-    const GiaThueThucTe = req.body.giaThueThucTe
+    const Gia = req.body.gia
     try {
-        await Rental.addRental(MaHopDong,MaSinhVien, MaPhong, BatDau, KetThuc, TienDatCoc,GiaThueThucTe)
+        await Rental.addRental(MaHopDong,MaSinhVien, MaPhong, BatDau, KetThuc, Gia)
         req.flash('success', 'Thêm rental thành công!')
         res.redirect('/rental')
     } catch (error) {
@@ -78,10 +77,9 @@ exports.updateRental = async (req, res, next) => {
     const MaPhong = req.body.maPhong
     const BatDau = req.body.batDau
     const KetThuc = req.body.ketThuc
-    const TienDatCoc = req.body.tienDatCoc
-    const GiaThueThucTe = req.body.giaThueThucTe
+    const Gia = req.body.gia
     try {
-        await Rental.updateRental(MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, TienDatCoc, GiaThueThucTe)
+        await Rental.updateRental(MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia)
         req.flash('success', 'Cập nhật rental thành công!')
         res.redirect('/rental')
     } catch (error) {

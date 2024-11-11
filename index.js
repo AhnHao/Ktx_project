@@ -32,6 +32,7 @@ const studentRoutes = require('./routes/student')
 const employeesRoutes = require('./routes/Employees')
 const paymentRoutes = require('./routes/payment')
 const rentalRoutes = require('./routes/rental')
+const authstudentRoutes = require('./routes/authstudent')
 
 app.use(classRoute)
 app.use(authRoutes)
@@ -40,6 +41,7 @@ app.use(studentRoutes)
 app.use(employeesRoutes)
 app.use(paymentRoutes)
 app.use(rentalRoutes)
+app.use(authstudentRoutes)
 
 app.listen(PORT, () => {
   console.log('App is running on port 8080');
