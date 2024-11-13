@@ -88,6 +88,7 @@ CREATE TABLE DienNuoc (
 DELIMITER //
 CREATE FUNCTION GenerateMaDienNuoc()
 RETURNS VARCHAR(10)
+READS SQL DATA
 BEGIN
     DECLARE newMaDienNuoc VARCHAR(10);
     DECLARE latestMaDienNuoc VARCHAR(10);
@@ -112,6 +113,7 @@ DELIMITER ;
 DELIMITER //
 CREATE FUNCTION GenerateMaHopDong()
 RETURNS VARCHAR(10)
+READS SQL DATA
 BEGIN
     DECLARE newMaHopDong VARCHAR(10);
     DECLARE latestMaHopDong VARCHAR(10);
@@ -129,11 +131,12 @@ END;
 //
 DELIMITER ;
 
+
 -- Function kiểm tra số người trong phòng
 DELIMITER //
-
 CREATE FUNCTION SoNguoiTrongPhong(MaPhongInput VARCHAR(10))
 RETURNS INT
+READS SQL DATA
 BEGIN
     DECLARE SoNguoi INT;
     
@@ -144,8 +147,9 @@ BEGIN
     
     RETURN SoNguoi;
 END;
-
+//
 DELIMITER ;
+
 
 -- Procedure tạo hợp đồng thuê phòng
 DELIMITER //
@@ -155,7 +159,8 @@ CREATE PROCEDURE TaoHopDongThuePhong(
     IN MaPhongInput VARCHAR(10),
     IN BatDauInput DATE,
     IN KetThucInput DATE,
-    IN GiaInput FLOAT
+    IN GiaInput FLOAT,
+  
 )
 BEGIN
     DECLARE SoNguoi INT;
@@ -163,6 +168,36 @@ BEGIN
     DECLARE GioiTinhSinhVien CHAR(1);
     DECLARE PhongNam_Nu CHAR(1);
     DECLARE MaHopDongGenerated VARCHAR(10);
+    DECLARE existingContract INT;
+
+    -- Kiểm tra dữ liệu đầu vào
+    IF BatDauInput IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ngày bắt đầu không được để trống';
+    END IF;
+
+    IF GiaInput <= 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Giá thuê phải lớn hơn 0';
+    END IF;
+
+    -- Kiểm tra sinh viên tồn tại
+    IF NOT EXISTS (SELECT 1 FROM SinhVien WHERE MaSinhVien = MaSinhVienInput) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sinh viên không tồn tại trong hệ thống';
+    END IF;
+
+    -- Kiểm tra phòng tồn tại
+    IF NOT EXISTS (SELECT 1 FROM Phong WHERE MaPhong = MaPhongInput) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Phòng không tồn tại trong hệ thống';
+    END IF;
+
+    -- Kiểm tra sinh viên đã có hợp đồng thuê phòng chưa
+    SELECT COUNT(*) INTO existingContract
+    FROM ThuePhong
+    WHERE MaSinhVien = MaSinhVienInput 
+    AND (KetThuc IS NULL OR KetThuc >= CURRENT_DATE());
+    
+    IF existingContract > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sinh viên đã có hợp đồng thuê phòng đang còn hiệu lực';
+    END IF;
 
     -- Generate contract code
     SET MaHopDongGenerated = GenerateMaHopDong();
@@ -170,138 +205,62 @@ BEGIN
     -- Lấy số người hiện tại trong phòng
     SET SoNguoi = SoNguoiTrongPhong(MaPhongInput);
 
-    -- Lấy số giường của phòng
-    SELECT SoGiuong, PhongNam_Nu INTO SoGiuong, PhongNam_Nu FROM Phong WHERE MaPhong = MaPhongInput;
+    -- Lấy thông tin phòng
+    SELECT SoGiuong, PhongNam_Nu 
+    INTO SoGiuong, PhongNam_Nu 
+    FROM Phong 
+    WHERE MaPhong = MaPhongInput;
 
     -- Lấy giới tính của sinh viên
-    SELECT GioiTinh INTO GioiTinhSinhVien FROM SinhVien WHERE MaSinhVien = MaSinhVienInput;
+    SELECT GioiTinh 
+    INTO GioiTinhSinhVien 
+    FROM SinhVien 
+    WHERE MaSinhVien = MaSinhVienInput;
 
     -- Kiểm tra phòng đã đủ chỗ chưa và sinh viên có đúng giới tính không
-    IF SoNguoi < SoGiuong THEN
-        IF (PhongNam_Nu = 'M' AND GioiTinhSinhVien = 'M') OR (PhongNam_Nu = 'F' AND GioiTinhSinhVien = 'F') THEN
-            -- Tạo hợp đồng thuê phòng
-            INSERT INTO ThuePhong (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia)
-            VALUES (MaHopDongGenerated, MaSinhVienInput, MaPhongInput, BatDauInput, KetThucInput, GiaInput);
-
-            -- Tạo bản ghi TT_ThuePhong với ngày thanh toán là NULL
-            INSERT INTO TT_ThuePhong (MaHopDong, ThangNam, SoTien, NgayThanhToan, MaNhanVien)
-            VALUES (MaHopDongGenerated, BatDauInput, GiaInput, NULL, NULL);
-        ELSE
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Giới tính sinh viên không phù hợp với loại phòng.';
-        END IF;
-    ELSE
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Phòng đã đầy, không thể thêm người vào phòng này nữa.';
+    IF SoNguoi >= SoGiuong THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Phòng đã đầy, không thể thêm người vào phòng này nữa';
     END IF;
-END //
 
-DELIMITER ;
-
--- Trigger tạo hóa đơn điện nước khi phòng mới được sử dụng
-DELIMITER //
-
-CREATE TRIGGER tao_hoadon_diennuoc_khi_phong_moi_duoc_su_dung
-AFTER INSERT ON ThuePhong
-FOR EACH ROW
-BEGIN
-    DECLARE MaDienNuocMoi VARCHAR(10);
-
-    -- Kiểm tra xem phòng này đã từng có sinh viên thuê chưa
-    IF (SELECT COUNT(*) FROM ThuePhong WHERE MaPhong = NEW.MaPhong) = 1 THEN
-        -- Nếu đây là sinh viên đầu tiên thuê phòng, sử dụng hàm GenerateMaDienNuoc để tạo mã điện nước mới
-        SET MaDienNuocMoi = GenerateMaDienNuoc();
-
-        -- Thêm bản ghi vào bảng DienNuoc với MaPhong từ hợp đồng thuê phòng mới
-        INSERT INTO DienNuoc (MaDienNuoc, MaPhong, ChiSoDien, ChiSoNuoc, ThangNam, SoTienDien, SoTienNuoc)
-        VALUES (MaDienNuocMoi, NEW.MaPhong, 0, 0, DATE_FORMAT(NOW(), '%Y-%m'), 0, 0);
+    IF (PhongNam_Nu = 'M' AND GioiTinhSinhVien = 'F') OR (PhongNam_Nu = 'F' AND GioiTinhSinhVien = 'M') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Giới tính sinh viên không phù hợp với loại phòng';
     END IF;
-END //
 
-DELIMITER ;
-
--- Trigger xoá hóa đơn điện nước khi phòng không còn sử dụng
-DELIMITER //
-
-CREATE TRIGGER xoa_hoadon_diennuoc_khi_phong_khong_con_su_dung
-AFTER DELETE ON ThuePhong
-FOR EACH ROW
-BEGIN
-    DECLARE soHopDong INT;
-
-    -- Kiểm tra xem phòng còn hợp đồng thuê nào không
-    SET soHopDong = (SELECT COUNT(*) FROM ThuePhong WHERE MaPhong = OLD.MaPhong);
-
-    -- Nếu không còn hợp đồng thuê nào, xoá tất cả các hoá đơn điện nước của phòng
-    IF soHopDong = 0 THEN
-        DELETE FROM DienNuoc WHERE MaPhong = OLD.MaPhong;
+    IF KetThucInput IS NOT NULL AND KetThucInput <= BatDauInput THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ngày kết thúc phải sau ngày bắt đầu';
     END IF;
-END //
-
-DELIMITER ;
-
--- Procedure tạo hóa đơn điện nước mới
-DELIMITER //
-
-CREATE PROCEDURE TaoHoaDonDienNuocMoi(
-    IN MaPhongInput VARCHAR(10),
-    IN ThangNamInput DATE,
-    IN SoTienDienInput FLOAT,
-    IN SoTienNuocInput FLOAT
-)
-BEGIN
-    DECLARE MaDienNuocMoi VARCHAR(10);
-    DECLARE TienConLai FLOAT;
-    
-    -- Generate a new bill code for electricity and water based on the GenerateMaDienNuoc function
-    SET MaDienNuocMoi = GenerateMaDienNuoc();
-
-    -- Calculate TienConLai as the sum of SoTienDienInput and SoTienNuocInput
-    SET TienConLai = SoTienDienInput + SoTienNuocInput;
-    
-    -- Insert the new bill record for the specified room and month
-    INSERT INTO DienNuoc (MaDienNuoc, MaPhong, ThangNam, SoTienDien, SoTienNuoc, TienConLai, NgayDong)
-    VALUES (MaDienNuocMoi, MaPhongInput, ThangNamInput, SoTienDienInput, SoTienNuocInput, TienConLai, NULL);
-    
-    -- Optional: Display a success message
-    SELECT CONCAT('New bill created with MaDienNuoc: ', MaDienNuocMoi) AS Message;
-END //
-
-DELIMITER ;
-
--- Procedure chỉnh sữa hóa đơn điện nước
-DELIMITER //
-
-CREATE PROCEDURE ChinhSuaThanhToanDienNuoc(
-    IN MaDienNuocInput VARCHAR(10),
-    IN SoTienDienInput FLOAT,
-    IN SoTienNuocInput FLOAT,
-    IN TienConLaiInput FLOAT,
-    IN NgayDongInput DATE
-)
-BEGIN
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'An error occurred during the transaction.';
-    END;
 
     START TRANSACTION;
+    
+    -- Tạo hợp đồng thuê phòng
+    INSERT INTO ThuePhong (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia)
+    VALUES (MaHopDongGenerated, MaSinhVienInput, MaPhongInput, BatDauInput, KetThucInput, GiaInput);
 
-    IF EXISTS (SELECT 1 FROM DienNuoc WHERE MaDienNuoc = MaDienNuocInput) THEN
-        UPDATE DienNuoc
-        SET SoTienDien = SoTienDienInput,
-            SoTienNuoc = SoTienNuocInput,
-            TienConLai = TienConLaiInput,
-            NgayDong = NgayDongInput
-        WHERE MaDienNuoc = MaDienNuocInput;
-        COMMIT;
-    ELSE
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'MaDienNuoc does not exist.';
-    END IF;
+    -- Tạo bản ghi TT_ThuePhong với ngày thanh toán là CURRENT_DATE() và MaNhanVien từ input
+    INSERT INTO TT_ThuePhong (MaHopDong, ThangNam, SoTien, NgayThanhToan, MaNhanVien)
+    VALUES (MaHopDongGenerated, BatDauInput, GiaInput, null, 'CB000001');
+
+    COMMIT;
+
+    -- Trả về mã hợp đồng đã tạo
+    SELECT MaHopDongGenerated AS 'MaHopDong', 
+           'Tạo hợp đồng thuê phòng thành công' AS 'Message';
+
 END //
 
 DELIMITER ;
 
+-- Xoá hợp đồng thuê phòng
+DELIMITER //
+
+CREATE PROCEDURE DeleteRental(
+    IN p_MaHopDong VARCHAR(50)
+)
+BEGIN
+    DELETE FROM thuephong WHERE MaHopDong = p_MaHopDong;
+END //
+
+DELIMITER ;
 --Thanh toán hóa đơn điện nước
 DELIMITER //
 
@@ -332,9 +291,64 @@ END //
 DELIMITER ;
 
 
+-- Truy vấn thanh toán dựa trên maHopDong
+DELIMITER //
 
+CREATE PROCEDURE get_payment_by_contract(IN contractID VARCHAR(10))
+BEGIN
+    SELECT 
+        TT.MaHopDong,
+        TT.ThangNam,
+        TT.SoTien,
+        TT.NgayThanhToan,
+        TT.MaNhanVien
+    FROM 
+        TT_ThuePhong TT
+    JOIN ThuePhong TP ON TT.MaHopDong = TP.MaHopDong
+    JOIN SinhVien SV ON TP.MaSinhVien = SV.MaSinhVien
+    JOIN NhanVien NV ON TT.MaNhanVien = NV.MaNhanVien
+    WHERE 
+        TT.MaHopDong = contractID;
+END //
 
+DELIMITER ; 
 
+-- Trigger: Cập nhật ngày thanh toán trong TT_ThuePhong
+DELIMITER //
+
+CREATE PROCEDURE CapNhatTT_ThuePhong (
+    IN p_MaHopDong VARCHAR(10),
+    IN p_ThangNam DATE,
+    IN p_SoTien FLOAT,
+    IN p_NgayThanhToan DATE,
+    IN p_MaNhanVien VARCHAR(10)
+)
+BEGIN
+    -- Bắt đầu giao dịch
+    START TRANSACTION;
+        -- Cập nhật thông tin thuê phòng
+        UPDATE TT_ThuePhong
+        SET SoTien = p_SoTien,
+            ThangNam = p_ThangNam,
+            NgayThanhToan = p_NgayThanhToan,
+            MaNhanVien = p_MaNhanVien
+        WHERE MaHopDong = p_MaHopDong;
+    -- Commit giao dịch nếu không có lỗi
+    COMMIT;
+END //
+
+DELIMITER ;
+
+-- Thủ tục xóa bản ghi TT_ThuePhong
+DELIMITER //
+
+CREATE PROCEDURE delete_tt_thuephong(IN p_MaHopDong VARCHAR(10))
+BEGIN
+        DELETE FROM TT_ThuePhong WHERE MaHopDong = p_MaHopDong;
+        DELETE FROM ThuePhong WHERE MaHopDong = p_MaHopDong;
+END //
+
+DELIMITER ;
 
 
 INSERT INTO Phong (MaPhong, TenPhong, DienTich, SoGiuong, GiaThue, PhongNam_Nu)

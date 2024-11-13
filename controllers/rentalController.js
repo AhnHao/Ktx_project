@@ -11,14 +11,12 @@ exports.getAllRentals = async (req, res, next) => {
     const allRentals = await Rental.getAllRentals()
     const allRooms = await Room.getAllrooms()
     const allStudents = await Student.getAllStudents()
-    const allEmployees = await Employees.getAllEmployees()
     res.render('rental/rental', {
         pageTitle: 'Rental',
         path: '/rental',
         allRentals: allRentals,
         allRooms: allRooms,
         allStudents: allStudents,
-        allEmployees: allEmployees,
         searchMaHopDong: '',
         searchMaSinhVien: '',
         searchMaPhong: '',
@@ -63,6 +61,7 @@ exports.getEditRental = async (req, res, next) => {
     const allRooms = await Room.getAllrooms()
     const allStudents = await Student.getAllStudents()
     const getRental = await Rental.getRental(MaHopDong)
+    const allEmployees = await Employees.getAllEmployees()
     res.render('rental/rental', {
         pageTitle: 'Edit Rental',
         path : '/rental',
@@ -70,8 +69,11 @@ exports.getEditRental = async (req, res, next) => {
         allRooms: allRooms,
         allStudents: allStudents,
         editRental: getRental[0],
+        allEmployees: allEmployees,
         searchMaHopDong: '',
         searchMaSinhVien: '',
+        successMessage: null,
+        errorMessage: null,
         searchMaPhong: '',
         editing: editMode,
         successMessage: null
