@@ -6,9 +6,9 @@ const Rental = {
         const [result] = await db.query(sql)
         return result
     },
-    addRental: async function (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia) {
-        const sql = 'INSERT INTO thuephong (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia) VALUES (?, ?, ?, ?, ?, ?, ?)'
-        await db.query(sql, [MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia])
+    addRental: async function ( MaSinhVien, MaPhong, BatDau, KetThuc, Gia, MaNhanVien) {
+        const sql = 'CALL TaoHopDongThuePhong(?, ?, ?, ?, ?, ?)'
+        await db.query(sql, [ MaSinhVien, MaPhong, BatDau, KetThuc, Gia, MaNhanVien])
     },
     deleteRental: async function (MaHopDong) {
         const sql = 'DELETE FROM thuephong WHERE MaHopDong = ?'

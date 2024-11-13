@@ -2,7 +2,7 @@ const db = require('../config/database')
 
 const Room = {
   getAllrooms: async function () {
-    const sql = 'SELECT p.*, (p.SoGiuong - COUNT(tp.MaHopDong)) AS GiuongConLai FROM phong p LEFT JOIN thuephong tp ON p.MaPhong = tp.MaPhong GROUP BY p.MaPhong'
+    const sql = 'SELECT p.*, (p.SoGiuong - COUNT(tp.MaHopDong)) AS GiuongTrong FROM phong p LEFT JOIN thuephong tp ON p.MaPhong = tp.MaPhong GROUP BY p.MaPhong'
     const [result] = await db.query(sql)
     return result
   },
