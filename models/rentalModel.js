@@ -11,7 +11,7 @@ const Rental = {
         await db.query(sql, [ MaSinhVien, MaPhong, BatDau, KetThuc, Gia])
     },
     deleteRental: async function (MaHopDong) {
-        const sql = 'CALL DeleteRental(?)'
+        const sql = 'CALL XoaHopDongThuePhong(?)'
         await db.query(sql, [MaHopDong])
     },
     getRental: async function (MaHopDong) {

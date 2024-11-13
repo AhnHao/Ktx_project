@@ -1,13 +1,16 @@
 const Student = require('../models/studentModel')
+const Class = require('../models/classModel')
 
 exports.getAllStudents = async (req, res, next) => {
   let successMessage = req.flash('success')
   let errorMessage = req.flash('error')
   const allStudents = await Student.getAllStudents()
+  const allClasses = await Class.getAllClasses()
   res.render('student/student', {
     pageTitle: 'Danh Sách Sinh Viên',
     path: '/student',
     allStudents: allStudents,
+    allClasses: allClasses,
     errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
     successMessage: successMessage.length > 0 ? successMessage[0] : null,
     editing: false

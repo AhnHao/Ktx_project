@@ -9,6 +9,9 @@
           <% if(errorMessage) { %>
             <div class="user-message user-message--error mt-3"><%= errorMessage %></div>
           <% } %>
+          <% if (successMessage) { %>
+            <div class="user-message user-message--success mt-3"><%= successMessage %></div>
+          <% } %>
         </div>
         <div class="row">
           <div class="d-flex justify-content-center">
