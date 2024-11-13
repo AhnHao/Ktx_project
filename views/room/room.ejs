@@ -1,4 +1,4 @@
-  <%- include('../layouts/head.ejs') %>
+<%- include('../layouts/head.ejs') %>
 </head>
 <body>
   <div class="container-fluid">
@@ -57,7 +57,7 @@
                   <td><%= room.MaPhong %></td>
                   <td><%= room.TenPhong %></td>
                   <td><%= room.DienTich %></td>
-                  <td><%= room.GiuongConLai %>/<%= room.SoGiuong %></td>
+                  <td><%= room.SoGiuong - room.GiuongConLai %>/<%= room.SoGiuong %></td>
                   <td><%= (+room.GiaThue).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
                   <td><%= room.PhongNam_Nu %></td>
                   <td>

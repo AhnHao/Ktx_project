@@ -7,11 +7,11 @@ const Rental = {
         return result
     },
     addRental: async function (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia) {
-        const sql = 'INSERT INTO thuephong (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        const sql = 'CALL AddRental(?, ?, ?, ?, ?, ?)'
         await db.query(sql, [MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia])
     },
     deleteRental: async function (MaHopDong) {
-        const sql = 'DELETE FROM thuephong WHERE MaHopDong = ?'
+        const sql = 'CALL DeleteRental(?)'
         await db.query(sql, [MaHopDong])
     },
     getRental: async function (MaHopDong) {

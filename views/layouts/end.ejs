@@ -1,3 +1,24 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    function handlePayment(maDienNuoc) {
+        fetch('/updatePaymentStatus', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ maDienNuoc: maDienNuoc })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'Cập nhật thanh toán thành công') {
+                alert('Thanh toán thành công!');
+                location.reload(); // Refresh the page
+            } else {
+                alert('Đã xảy ra lỗi: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+  </script>
 </body>
 </html>

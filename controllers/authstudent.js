@@ -56,7 +56,6 @@ exports.login = async (req, res, next) => {
       if (err) {
         console.error('Session save error:', err);
       }
-      // console.log('Student session:', req.session.student);
       res.redirect('/roominfo');
     });
 

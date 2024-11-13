@@ -119,9 +119,13 @@
                             <% } %>
                           </td>
                           <td>
-                            <% if (!utility.NgayDong) { %>
-                              <button class="btn btn-primary">Quét mã QR</button>
-                            <% } %>
+                            
+                              <% if (utility.NgayDong) { %>
+                                <%= new Date(utility.NgayDong).toLocaleDateString('vi-VN') %>
+                              <% } else { %>
+                                <button class="btn btn-primary" onclick="handlePayment('<%= utility.MaDienNuoc %>')">Quét mã QR</button>
+                              <% } %>
+                               
                           </td>
                       </tr>
                   <% }); %>
@@ -166,4 +170,5 @@
       
     </div>
   </div>
+  
 <%- include('../layouts/end.ejs') %>
