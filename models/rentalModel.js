@@ -11,7 +11,7 @@ const Rental = {
         await db.query(sql, [ MaSinhVien, MaPhong, BatDau, KetThuc, Gia, MaNhanVien])
     },
     deleteRental: async function (MaHopDong) {
-        const sql = 'DELETE FROM thuephong WHERE MaHopDong = ?'
+        const sql = 'CALL DeleteRental(?)'
         await db.query(sql, [MaHopDong])
     },
     getRental: async function (MaHopDong) {

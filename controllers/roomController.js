@@ -108,12 +108,18 @@ exports.getRoomInfo = async (req, res, next) => {
 
   try{
     const student = req.session.student ? req.session.student[0] : null;
+    successMessage = req.flash('success');
+    errorMessage = req.flash('error');
     if(!student){
       req.flash('error', 'Vui lòng đăng nhập trước!');
       return res.redirect('/loginstudent');
     }
     const MaSinhVien = student.MaSinhVien;
     const rental = await Rental.getRentalByMSSV(MaSinhVien);
+    if(rental.length === 0){
+      req.flash('error', 'Bạn chưa thuê phòng nào!');
+      return res.redirect('/loginstudent');
+    }
     const room = await Room.getRoomByMaPhong(rental[0].MaPhong);
     const utilities = await Utility.getUtilityByMaPhong(rental[0].MaPhong);
     const className = await Class.getClassName(student.MaLop);
@@ -127,11 +133,13 @@ exports.getRoomInfo = async (req, res, next) => {
       room: room[0],
       rental: rental[0],
       utilities: utilities,
+      errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
+      successMessage: successMessage.length > 0 ? successMessage[0] : null,
       editing: false
     });
   }
   catch(err){
     console.log(err)
   }
-  
-};
+}
+

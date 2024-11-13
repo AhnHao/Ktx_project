@@ -122,7 +122,7 @@
               <label for="ThangNam" class="col-sm-4">Tháng/Năm</label>
               <div class="col-md-8">
                 <input type="date" id="ThangNam" name="ThangNam" required
-                  value="<%= editing ? new Date(editTT_ThuePhong.ThangNam).toISOString().split('T')[0] : '' %>">
+                  value="<%= editing ? new Date(new Date(editTT_ThuePhong.ThangNam).setHours(12)).toISOString().split('T')[0] : '' %>">
               </div>
             </div>
             <div class="row mb-3">
@@ -136,7 +136,7 @@
               <label for="NgayThanhToan" class="col-sm-4">Ngày thanh toán</label>
               <div class="col-md-8 d-flex">
                 <input type="date" id="NgayThanhToan" name="NgayThanhToan"
-                  value="<%= editing ? new Date(editTT_ThuePhong.NgayThanhToan).toISOString().split('T')[0] : '' %>">
+                  value="<%= editing ? new Date(new Date(editTT_ThuePhong.NgayThanhToan).setHours(12)).toISOString().split('T')[0] : '' %>">
                   <button type="button" class="btn btn-success ms-2"
                   onclick="document.getElementById('NgayThanhToan').value = new Date().toISOString().split('T')[0];">
                   <i class="bi bi-calendar-check"></i>
