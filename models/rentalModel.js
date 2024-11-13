@@ -6,9 +6,9 @@ const Rental = {
         const [result] = await db.query(sql)
         return result
     },
-    addRental: async function ( MaSinhVien, MaPhong, BatDau, KetThuc, Gia, MaNhanVien) {
-        const sql = 'CALL TaoHopDongThuePhong(?, ?, ?, ?, ?, ?)'
-        await db.query(sql, [ MaSinhVien, MaPhong, BatDau, KetThuc, Gia, MaNhanVien])
+    addRental: async function ( MaSinhVien, MaPhong, BatDau, KetThuc, Gia) {
+        const sql = 'CALL TaoHopDongThuePhong(?, ?, ?, ?, ?)'
+        await db.query(sql, [ MaSinhVien, MaPhong, BatDau, KetThuc, Gia])
     },
     deleteRental: async function (MaHopDong) {
         const sql = 'CALL DeleteRental(?)'
@@ -20,9 +20,9 @@ const Rental = {
         return result
     },
     updateRental: async function (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia) {
-        const sql = 'UPDATE thuephong SET MaSinhVien = ?, MaPhong = ?, BatDau = ?, KetThuc = ?, Gia = ? WHERE MaHopDong = ?'
-        const[result] = await db.query(sql, [MaSinhVien, MaPhong, BatDau, KetThuc, Gia , MaHopDong])
-        return result
+        const sql = 'CALL UpdateRental(?, ?, ?, ?, ?, ?)';
+        const [result] = await db.query(sql, [MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia]);
+        return result;
     },
     searchRental: async function (searchMaHopDong,searchMaSinhVien,searchMaPhong) {
         const sql = 'SELECT * FROM thuephong WHERE MaHopDong LIKE ? AND MaSinhVien LIKE ? AND MaPhong LIKE ?'

@@ -119,7 +119,7 @@
           <div class="row mb-3">
             <label for="tienConLai" class="col-sm-4">Tiền còn lại</label>
             <div class="col-md-8">
-              <input type="number" mon="0" id="tienConLai" required name="tienConLai" value="<% if(editing) { %><%= (+editUtility.TienConLai) %><% } %>">
+              <input type="number" mon="0" id="tienConLai" name="tienConLai" value="<% if(editing) { %><%= (+editUtility.TienConLai) %><% } %>">
             </div>
           </div>
           <button type="submit" class="btn btn-primary"><% if(editing) { %>Cập nhật<% } else { %>Thêm<% } %></button>

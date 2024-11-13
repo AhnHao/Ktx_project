@@ -187,19 +187,7 @@
                       value="<% if(editing) { %><%= editRental.Gia %><% } %>">
                 </div>
               </div>
-              <div class="row mb-3">
-                <label for="MaNhanvien" class="col-sm-4 ">Mã Nhân Viên</label>
-                <div class="col-sm-8">
-                  <select id="MaNhanVien" required name="MaNhanVien" class="form-select">
-                    <option value="" selected>--Chọn mã nhân viên--</option>
-                    <% allEmployees.forEach(employee => { %>
-                      <option value="<%= employee.MaNhanVien %>" <%= editing && editRental.MaNhanVien === employee.MaNhanVien ? 'selected' : '' %>>
-                        <%= employee.MaNhanVien %> - <%= employee.HoTen %>
-                      </option>
-                    <% }) %>
-                    </select>
-                </div>
-              </div>
+              
             
               <div class="d-flex ">
                 <button type="submit" class="btn btn-primary">
