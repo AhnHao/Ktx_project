@@ -3,16 +3,13 @@ const bcrypt = require('bcryptjs')
 const { validationResult } = require('express-validator')
 
 exports.getLogin = (req, res, next) => {
-  let message = req.flash('error')
-  if (message.length > 0) {
-    message = message[0]
-  } else {
-    message = null
-  }
+  let errormessage = req.flash('error')
+  let successmessage = req.flash('success')
   res.render('auth/login', {
     pageTitle: 'Login',
     path: '/login',
-    errorMessage: message,
+    errorMessage: errormessage[0]||null,
+    successMessage: successmessage[0]||null,
     oldInput: {
       email: '',
       password: ''
@@ -69,6 +66,7 @@ exports.login = async (req, res, next) => {
     req.session.isLoggedIn = true
     req.session.admin = admin
     return req.session.save(err => {
+      req.flash('success', 'Đăng nhập thành công!')
       res.redirect('/room')
     })
   } catch (err) {

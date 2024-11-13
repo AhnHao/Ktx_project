@@ -114,10 +114,10 @@ exports.searchRental = async (req, res, next) => {
             searchMaSinhVien: searchMaSinhVien,
             searchMaPhong: searchMaPhong,
             successMessage: null,
+            errorMessage: null,
             editing: false
         })
     }catch (error) {
-        console.error('Lỗi khi tìm kiếm rental:', error)
         req.flash('error', 'Lỗi khi tìm kiếm rental')
         res.redirect('/rental')
     }

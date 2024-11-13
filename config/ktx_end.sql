@@ -84,8 +84,9 @@ CREATE TABLE DienNuoc (
     NgayDong DATE,                                  -- Ngày đóng hóa đơn
     FOREIGN KEY (MaPhong) REFERENCES Phong(MaPhong) -- Khóa ngoại liên kết tới bảng Phòng
 );
--- Function to generate next MaDienNuoc
+-- Hàm tạo ra mã điện nước tự động
 DELIMITER //
+
 CREATE FUNCTION GenerateMaDienNuoc()
 RETURNS VARCHAR(10)
 READS SQL DATA
@@ -93,23 +94,64 @@ BEGIN
     DECLARE newMaDienNuoc VARCHAR(10);
     DECLARE latestMaDienNuoc VARCHAR(10);
     
-    -- Get the latest ID
-    SELECT MaDienNuoc INTO latestMaDienNuoc FROM DienNuoc ORDER BY MaDienNuoc DESC LIMIT 1;
+    -- Lấy mã hóa đơn điện nước mới nhất
+    SELECT MaDienNuoc INTO latestMaDienNuoc 
+    FROM DienNuoc 
+    ORDER BY MaDienNuoc DESC 
+    LIMIT 1;
     
-    -- If there's no record yet, start with HD000001
+    -- Nếu chưa có mã nào, bắt đầu với HD000001
     IF latestMaDienNuoc IS NULL THEN
         SET newMaDienNuoc = 'HD000001';
     ELSE
-        -- Increment by 1 based on current numeric portion
+        -- Tăng mã lên 1 dựa trên phần số trong mã
         SET newMaDienNuoc = CONCAT('HD', LPAD(CAST(SUBSTRING(latestMaDienNuoc, 3) AS UNSIGNED) + 1, 6, '0'));
     END IF;
     
+    -- Trả về mã hóa đơn mới
     RETURN newMaDienNuoc;
-END;
-//
+END //
+
+DELIMITER ;
+-- Thêm điện nước dựa vào mã điện nước được tạo tự động
+DELIMITER //
+
+CREATE PROCEDURE ThemDienNuoc(
+    IN p_MaPhong VARCHAR(10),
+    IN p_ThangNam DATE,
+    IN p_SoTienDien FLOAT,
+    IN p_SoTienNuoc FLOAT,
+    IN p_TienConLai FLOAT,
+    IN p_NgayDong DATE
+)
+BEGIN
+    DECLARE newMaDienNuoc VARCHAR(10);
+    
+    -- Tạo mã điện nước mới sử dụng hàm GenerateMaDienNuoc
+    SET newMaDienNuoc = GenerateMaDienNuoc();
+    
+    -- Thực hiện thêm dữ liệu vào bảng DienNuoc
+    INSERT INTO DienNuoc (MaDienNuoc, MaPhong, ThangNam, SoTienDien, SoTienNuoc, TienConLai, NgayDong)
+    VALUES (newMaDienNuoc, p_MaPhong, p_ThangNam, p_SoTienDien, p_SoTienNuoc, p_TienConLai, p_NgayDong);
+END //
+
 DELIMITER ;
 
--- Function to generate next MaHopDong
+-- Xoá điện nước
+DELIMITER //
+
+CREATE PROCEDURE XoaDienNuoc(
+    IN p_MaDienNuoc VARCHAR(10)
+)
+BEGIN
+    -- Xóa bản ghi trong bảng DienNuoc theo MaDienNuoc
+    DELETE FROM DienNuoc WHERE MaDienNuoc = p_MaDienNuoc;
+END //
+
+DELIMITER ;
+
+show triggers
+-- Hàm tạo mã hợp đồng tự động
 DELIMITER //
 CREATE FUNCTION GenerateMaHopDong()
 RETURNS VARCHAR(10)
@@ -131,137 +173,152 @@ END;
 //
 DELIMITER ;
 
-
--- Function kiểm tra số người trong phòng
+-- Tạo hợp đồng thuê phòng từ mã hợp đồng tự động generate ra bằng function
 DELIMITER //
-CREATE FUNCTION SoNguoiTrongPhong(MaPhongInput VARCHAR(10))
-RETURNS INT
-READS SQL DATA
-BEGIN
-    DECLARE SoNguoi INT;
-    
-    SELECT COUNT(DISTINCT ThuePhong.MaSinhVien) INTO SoNguoi
-    FROM ThuePhong
-    JOIN TT_ThuePhong ON ThuePhong.MaHopDong = TT_ThuePhong.MaHopDong
-    WHERE ThuePhong.MaPhong = MaPhongInput AND TT_ThuePhong.NgayThanhToan IS NOT NULL;
-    
-    RETURN SoNguoi;
-END;
-//
-DELIMITER ;
-
-
--- Procedure tạo hợp đồng thuê phòng
-DELIMITER //
-
 CREATE PROCEDURE TaoHopDongThuePhong(
-    IN MaSinhVienInput VARCHAR(10),
-    IN MaPhongInput VARCHAR(10),
-    IN BatDauInput DATE,
-    IN KetThucInput DATE,
-    IN GiaInput FLOAT,
-  
+    IN MaSinhVien VARCHAR(10),
+    IN MaPhong VARCHAR(10),
+    IN BatDau DATE,
+    IN KetThuc DATE,
+    IN Gia DECIMAL(10, 2)
 )
 BEGIN
-    DECLARE SoNguoi INT;
-    DECLARE SoGiuong INT;
-    DECLARE GioiTinhSinhVien CHAR(1);
-    DECLARE PhongNam_Nu CHAR(1);
-    DECLARE MaHopDongGenerated VARCHAR(10);
-    DECLARE existingContract INT;
+    DECLARE newMaHopDong VARCHAR(10);
 
-    -- Kiểm tra dữ liệu đầu vào
-    IF BatDauInput IS NULL THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ngày bắt đầu không được để trống';
-    END IF;
+    -- Gọi hàm GenerateMaHopDong để tạo mã hợp đồng mới
+    SET newMaHopDong = GenerateMaHopDong();
 
-    IF GiaInput <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Giá thuê phải lớn hơn 0';
-    END IF;
-
-    -- Kiểm tra sinh viên tồn tại
-    IF NOT EXISTS (SELECT 1 FROM SinhVien WHERE MaSinhVien = MaSinhVienInput) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sinh viên không tồn tại trong hệ thống';
-    END IF;
-
-    -- Kiểm tra phòng tồn tại
-    IF NOT EXISTS (SELECT 1 FROM Phong WHERE MaPhong = MaPhongInput) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Phòng không tồn tại trong hệ thống';
-    END IF;
-
-    -- Kiểm tra sinh viên đã có hợp đồng thuê phòng chưa
-    SELECT COUNT(*) INTO existingContract
-    FROM ThuePhong
-    WHERE MaSinhVien = MaSinhVienInput 
-    AND (KetThuc IS NULL OR KetThuc >= CURRENT_DATE());
-    
-    IF existingContract > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sinh viên đã có hợp đồng thuê phòng đang còn hiệu lực';
-    END IF;
-
-    -- Generate contract code
-    SET MaHopDongGenerated = GenerateMaHopDong();
-
-    -- Lấy số người hiện tại trong phòng
-    SET SoNguoi = SoNguoiTrongPhong(MaPhongInput);
-
-    -- Lấy thông tin phòng
-    SELECT SoGiuong, PhongNam_Nu 
-    INTO SoGiuong, PhongNam_Nu 
-    FROM Phong 
-    WHERE MaPhong = MaPhongInput;
-
-    -- Lấy giới tính của sinh viên
-    SELECT GioiTinh 
-    INTO GioiTinhSinhVien 
-    FROM SinhVien 
-    WHERE MaSinhVien = MaSinhVienInput;
-
-    -- Kiểm tra phòng đã đủ chỗ chưa và sinh viên có đúng giới tính không
-    IF SoNguoi >= SoGiuong THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Phòng đã đầy, không thể thêm người vào phòng này nữa';
-    END IF;
-
-    IF (PhongNam_Nu = 'M' AND GioiTinhSinhVien = 'F') OR (PhongNam_Nu = 'F' AND GioiTinhSinhVien = 'M') THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Giới tính sinh viên không phù hợp với loại phòng';
-    END IF;
-
-    IF KetThucInput IS NOT NULL AND KetThucInput <= BatDauInput THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ngày kết thúc phải sau ngày bắt đầu';
-    END IF;
-
-    START TRANSACTION;
-    
-    -- Tạo hợp đồng thuê phòng
+    -- Tạo hợp đồng mới với mã hợp đồng được tạo
     INSERT INTO ThuePhong (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia)
-    VALUES (MaHopDongGenerated, MaSinhVienInput, MaPhongInput, BatDauInput, KetThucInput, GiaInput);
+    VALUES (newMaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia);
 
-    -- Tạo bản ghi TT_ThuePhong với ngày thanh toán là CURRENT_DATE() và MaNhanVien từ input
-    INSERT INTO TT_ThuePhong (MaHopDong, ThangNam, SoTien, NgayThanhToan, MaNhanVien)
-    VALUES (MaHopDongGenerated, BatDauInput, GiaInput, null, 'CB000001');
-
-    COMMIT;
-
-    -- Trả về mã hợp đồng đã tạo
-    SELECT MaHopDongGenerated AS 'MaHopDong', 
-           'Tạo hợp đồng thuê phòng thành công' AS 'Message';
-
+    -- Trả về mã hợp đồng mới nếu cần
+    SELECT newMaHopDong AS MaHopDongMoi;
 END //
 
 DELIMITER ;
-
 -- Xoá hợp đồng thuê phòng
 DELIMITER //
 
-CREATE PROCEDURE DeleteRental(
-    IN p_MaHopDong VARCHAR(50)
+CREATE PROCEDURE XoaHopDongThuePhong(
+    IN p_MaHopDong VARCHAR(10)
 )
 BEGIN
-    DELETE FROM thuephong WHERE MaHopDong = p_MaHopDong;
+    -- Xóa bản ghi trong bảng ThuePhong theo MaHopDong
+    DELETE FROM ThuePhong WHERE MaHopDong = p_MaHopDong;
 END //
 
 DELIMITER ;
---Thanh toán hóa đơn điện nước
+
+-- Trigger kiểm tra ngày bắt đầu thuê phòng phải nhỏ hơn ngày kết thúc thuê phòng
+DELIMITER //
+
+CREATE TRIGGER CheckDateBeforeInsertOrUpdate
+BEFORE INSERT ON ThuePhong
+FOR EACH ROW
+BEGIN
+    -- Kiểm tra ngày bắt đầu phải nhỏ hơn ngày kết thúc
+    IF NEW.BatDau >= NEW.KetThuc THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ngày bắt đầu phải nhỏ hơn ngày kết thúc.';
+    END IF;
+END //
+
+DELIMITER ;
+
+-- Kiểm tra số lượng người trong phòng trước khi thêm vào
+DELIMITER //
+
+CREATE TRIGGER CheckRoomOccupancyBeforeInsert
+BEFORE INSERT ON ThuePhong
+FOR EACH ROW
+BEGIN
+    DECLARE current_occupants INT;
+    DECLARE room_capacity INT;
+
+    -- Đếm số lượng sinh viên hiện đang thuê phòng trong khoảng thời gian thuê
+    SELECT COUNT(tp.MaHopDong)
+    INTO current_occupants
+    FROM Phong p
+    LEFT JOIN ThuePhong tp 
+        ON p.MaPhong = tp.MaPhong
+        AND (tp.KetThuc IS NULL OR tp.KetThuc >= CURDATE()) -- Kiểm tra hợp đồng còn hiệu lực
+    WHERE p.MaPhong = NEW.MaPhong
+    GROUP BY p.MaPhong;
+
+    -- Lấy sức chứa của phòng từ bảng Phong
+    SELECT SoGiuong
+    INTO room_capacity
+    FROM Phong
+    WHERE MaPhong = NEW.MaPhong;
+
+    -- Kiểm tra nếu số người thuê hiện tại đã đạt sức chứa tối đa của phòng
+    IF current_occupants >= room_capacity THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Phòng đã đạt sức chứa tối đa.';
+    END IF;
+END //
+
+DELIMITER ;
+
+-- kiểm tra sinh viên nữ chỉ được thuê loại phòng F ( dành cho nữ) 
+DELIMITER //
+
+CREATE TRIGGER CheckGenderCompatibilityBeforeInsert
+BEFORE INSERT ON ThuePhong
+FOR EACH ROW
+BEGIN
+    DECLARE gender_student CHAR(1);
+    DECLARE gender_room CHAR(1);
+
+    -- Lấy giới tính của sinh viên từ bảng SinhVien
+    SELECT GioiTinh INTO gender_student
+    FROM SinhVien
+    WHERE MaSinhVien = NEW.MaSinhVien;
+
+    -- Lấy giới tính của phòng từ bảng Phong
+    SELECT PhongNam_Nu INTO gender_room
+    FROM Phong
+    WHERE MaPhong = NEW.MaPhong;
+
+    -- Kiểm tra nếu giới tính sinh viên và giới tính phòng không phù hợp
+    IF gender_student != gender_room THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Sinh viên chỉ được thuê phòng phù hợp với giới tính của mình.';
+    END IF;
+END //
+
+DELIMITER ;
+-- Trigger kiểm tra hợp đồng còn hiệu lực 
+DELIMITER //
+
+CREATE TRIGGER CheckActiveContractBeforeInsert
+BEFORE INSERT ON ThuePhong
+FOR EACH ROW
+BEGIN
+    DECLARE active_contracts INT;
+
+    -- Kiểm tra số lượng hợp đồng đang có hiệu lực của sinh viên
+    SELECT COUNT(*)
+    INTO active_contracts
+    FROM ThuePhong
+    WHERE MaSinhVien = NEW.MaSinhVien
+      AND MaPhong = NEW.MaPhong
+      AND (KetThuc IS NULL OR KetThuc >= NEW.BatDau);
+
+    -- Nếu có hợp đồng đang có hiệu lực, chặn việc thêm hợp đồng mới
+    IF active_contracts > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Sinh viên đã có hợp đồng thuê phòng còn hiệu lực.';
+    END IF;
+END //
+
+DELIMITER ;
+
+
+show triggers;
+
+-- Thanh toán quét mã QR nè dùng transaction
 DELIMITER //
 
 CREATE PROCEDURE ThanhToanHoaDonDienNuoc(
@@ -290,7 +347,6 @@ END //
 
 DELIMITER ;
 
-
 -- Truy vấn thanh toán dựa trên maHopDong
 DELIMITER //
 
@@ -313,7 +369,7 @@ END //
 
 DELIMITER ; 
 
--- Trigger: Cập nhật ngày thanh toán trong TT_ThuePhong
+-- Cập nhật ngày thanh toán trong TT_ThuePhong
 DELIMITER //
 
 CREATE PROCEDURE CapNhatTT_ThuePhong (
@@ -446,26 +502,22 @@ VALUES
 
 INSERT INTO ThuePhong (MaHopDong, MaSinhVien, MaPhong, BatDau, KetThuc, Gia)
 VALUES
-('M000001', 'B2111890', 'AA01101', '2023-09-01', '2024-03-01', 1900000),
-('M000002', 'B2105553', 'AA01101', '2023-09-01', '2024-03-01', 1900000),
-('M000003', 'B2111790', 'AA01102', '2023-09-01', '2024-03-01', 3900000),
-('M000004', 'B2111795', 'AA01103', '2023-09-01', '2024-03-01', 2180000),
-('M000005', 'B2111821', 'AA01104', '2023-09-01', '2024-03-01', 1900000),
-('M000006', 'B2105612', 'CA01001', '2023-09-01', '2024-03-01', 2450000),
-('M000007', 'B2111342', 'CA01002', '2023-09-01', '2024-03-01', 4700000);
+('M000002', 'B2111790', 'AA01101', '2023-09-01', '2024-03-01', 3900000),
+('M000003', 'B2111795', 'AA01103', '2023-09-01', '2024-03-01', 2180000),
+('M000004', 'B2111821', 'AA01104', '2023-09-01', '2024-03-01', 1900000),
+('M000005', 'B2105612', 'CA01001', '2023-09-01', '2024-03-01', 2450000),
+('M000006', 'B2111342', 'AA01102', '2023-09-01', '2024-03-01', 4700000);
+
 
 -- Insert Data for TT_ThuePhong (Payment Details)
 
 INSERT INTO TT_ThuePhong (MaHopDong, ThangNam, SoTien, NgayThanhToan, MaNhanVien)
 VALUES
-('M000001', '2023-11-01', 1900000, '2023-11-10', 'CB000001'),
 ('M000002', '2023-11-01', 1900000, '2023-11-11', 'CB000001'),
 ('M000003', '2023-11-01', 3900000, '2023-11-12', 'CB000001'),
 ('M000004', '2023-11-01', 2180000, '2023-11-13', 'CB000001'),
 ('M000005', '2023-11-01', 1900000, '2023-11-14', 'CB000001'),
-('M000006', '2023-11-01', 2450000, '2023-11-15', 'CB000001'),
-('M000007', '2023-11-01', 4700000, '2023-11-16', 'CB000001');
-
+('M000006', '2023-11-01', 2450000, '2023-11-15', 'CB000001');
 
 -- Insert Data into DienNuoc with Room Names Matching ThuePhong Table
 
@@ -475,7 +527,7 @@ VALUES
 ('HD000002', 'AA01102', '2023-11-01', 150000, 100000, 250000, NULL),
 ('HD000003', 'AA01103', '2023-11-01', 90000, 70000, 160000, NULL),
 ('HD000004', 'AA01104', '2023-11-01', 110000, 90000, 200000, NULL),
-('HD000006', 'CA01001', '2023-11-01', 125000, 75000, 200000, NULL),
-('HD000007', 'CA01002', '2023-11-01', 100000, 95000, 195000, NULL);
+('HD000005', 'CA01001', '2023-11-01', 125000, 75000, 200000, NULL),
+('HD000006', 'CA01002', '2023-11-01', 100000, 95000, 195000, NULL);
 
 

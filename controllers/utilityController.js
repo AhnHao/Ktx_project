@@ -14,7 +14,6 @@ exports.getAllUtilities = async (req, res, next) => {
     })
 }
 exports.addUtility = async (req, res, next) => {
-    const maDienNuoc = req.body.maDienNuoc;
     const maPhong = req.body.maPhong;
     const thangNam = req.body.thangNam;
     const soTienDien = req.body.soTienDien;
@@ -22,7 +21,7 @@ exports.addUtility = async (req, res, next) => {
     const tienConLai = req.body.tienConLai;
     const ngayDong = req.body.ngayDong;
     try {
-        await Utility.addUtility(maDienNuoc, maPhong,thangNam, soTienDien, soTienNuoc, tienConLai, ngayDong);
+        await Utility.addUtility(maPhong,thangNam, soTienDien, soTienNuoc, tienConLai, ngayDong);
         req.flash('success', 'Thêm hóa đơn điện nước thành công')
         res.redirect('/utility')
     } catch (err) {
