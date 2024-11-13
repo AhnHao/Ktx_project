@@ -108,59 +108,10 @@ DELIMITER ;
 
 
 -- Kiểm tra thanh toán của sinh viên trước khi đăng ký phòng (Trigger)
-DELIMITER //
-
-CREATE TRIGGER trg_check_payment_before_insert
-BEFORE INSERT ON ThuePhong
-FOR EACH ROW
-BEGIN
-    IF check_student_payment_status(NEW.MaSinhVien) THEN
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Sinh viên đã thanh toán một phòng, không thể đăng ký thêm phòng khác';
-    END IF;
-END //
-
-DELIMITER ;
-
--- Xóa đăng ký phòng khác của sinh viên sau khi thanh toán
-DELIMITER //
-
-CREATE TRIGGER trg_remove_other_rooms_after_payment
-AFTER UPDATE ON TT_ThuePhong
-FOR EACH ROW
-BEGIN
-    DECLARE tmp_MaHopDong VARCHAR(10);
-    SET tmp_MaHopDong = NEW.MaHopDong;
-    -- Kiểm tra tình trạng thanh toán của sinh viên
-    IF check_student_payment_status(tmp_MaHopDong) THEN
-        -- Xóa các phòng khác mà sinh viên đã gửi yêu cầu nhưng chưa thanh toán
-        DELETE FROM ThuePhong 
-        WHERE MaSinhVien = (SELECT MaSinhVien FROM ThuePhong WHERE MaHopDong = tmp_MaHopDong)
-        AND MaHopDong <> tmp_MaHopDong
-        AND MaHopDong IN (SELECT MaHopDong FROM TT_ThuePhong WHERE NgayThanhToan IS NULL);
-    END IF;
-END //
-
-DELIMITER ;
 
 
--- Đếm số sinh viên trong phòng
 
-DELIMITER //
-CREATE FUNCTION count_students_in_room(roomID VARCHAR(10))
-RETURNS INT
-DETERMINISTIC
-BEGIN
-    DECLARE count INT;
-    SELECT COUNT(*) INTO count
-    FROM ThuePhong TP
-    JOIN TT_ThuePhong TT ON TP.MaHopDong = TT.MaHopDong
-    WHERE TP.MaPhong = roomID AND TT.NgayThanhToan IS NOT NULL;
-    RETURN count;
-END //
-DELIMITER ;
 
--- Kiểm tra số lượng sinh viên trong phòng trước khi đăng ký
 
 DELIMITER //
 CREATE TRIGGER trg_check_room_capacity_before_insert

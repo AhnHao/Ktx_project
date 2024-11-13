@@ -45,7 +45,8 @@
                 <th scope="col">Mã phòng</th>
                 <th scope="col">Tên phòng</th>
                 <th scope="col">Diện tích (m<sup>2</sup>)</th>
-                <th scope="col">Số giường</th>
+                <th scope="col">Giường trống</th>
+                <th scope="col">Tổng giường</th>
                 <th scope="col">Giá thuê</th>
                 <th scope="col">Loại phòng</th>
                 <th scope="col">Sửa/Xóa</th>
@@ -57,7 +58,10 @@
                   <td><%= room.MaPhong %></td>
                   <td><%= room.TenPhong %></td>
                   <td><%= room.DienTich %></td>
-                  <td><%= room.SoGiuong - room.GiuongConLai %>/<%= room.SoGiuong %></td>
+
+                  <td><%= room.GiuongTrong %></td>
+                  <td><%= room.SoGiuong %></td>
+                  
                   <td><%= (+room.GiaThue).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
                   <td><%= room.PhongNam_Nu %></td>
                   <td>

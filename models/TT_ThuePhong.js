@@ -37,23 +37,7 @@ const TT_ThuePhong = {
     }
   },
 
-  // Thêm bản ghi mới vào TT_ThuePhong
-  addPaymentRecord: async function (contractID, thangNam, soTien, ngayThanhToan, maNhanVien) {
-    try {
-      const sql = 'CALL add_tt_thuephong(?, ?, ?, ?)';
-      const [result] = await db.query(sql, [
-        contractID,
-        thangNam,
-        parseInt(soTien),
-        ngayThanhToan ? ngayThanhToan : null,
-        maNhanVien,
-      ]);
-      return result;
-    } catch (error) {
-      console.error('Error adding new payment record:', error);
-      throw error;
-    }
-  },
+
 
   // Chỉnh sửa thông tin trong TT_ThuePhong
   updatePaymentRecord: async function (contractID, thangNam, soTien, ngayThanhToan, maNhanVien) {
