@@ -1,40 +1,46 @@
 const Rental = require('../models/rentalModel')
 const Room = require('../models/roomModel')
 const Student = require('../models/studentModel');
+const Employees = require('../models/EmployeesModel');
+const e = require('express');
 // const { search } = require('../routes/rental');
 
 exports.getAllRentals = async (req, res, next) => {
     let successMessage = req.flash('success');
+    let errorMessage = req.flash('error');
     const allRentals = await Rental.getAllRentals()
     const allRooms = await Room.getAllrooms()
     const allStudents = await Student.getAllStudents()
+    const allEmployees = await Employees.getAllEmployees()
     res.render('rental/rental', {
         pageTitle: 'Rental',
         path: '/rental',
         allRentals: allRentals,
         allRooms: allRooms,
         allStudents: allStudents,
+        allEmployees: allEmployees,
         searchMaHopDong: '',
         searchMaSinhVien: '',
         searchMaPhong: '',
         successMessage: successMessage.length > 0 ? successMessage[0] : null,
+        errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
         editing: false
     })
 }
 exports.addRental = async (req, res, next) => {
-    const MaHopDong = req.body.maHopDong
     const MaSinhVien = req.body.maSinhVien
     const MaPhong = req.body.maPhong
     const BatDau = req.body.batDau
     const KetThuc = req.body.ketThuc
     const Gia = req.body.gia
+    const MaNhanVien = req.body.MaNhanVien
     try {
-        await Rental.addRental(MaHopDong,MaSinhVien, MaPhong, BatDau, KetThuc, Gia)
+        await Rental.addRental(MaSinhVien, MaPhong, BatDau, KetThuc, Gia, MaNhanVien)
         req.flash('success', 'Thêm rental thành công!')
         res.redirect('/rental')
     } catch (error) {
-        console.error('Lỗi khi thêm rental:', error)
-        req.flash('error', 'Lỗi khi thêm rental')
+        console.error('Lỗi khi thêm rental:', error.sqlMessage)
+        req.flash('error', error.sqlMessage)
         res.redirect('/rental')
     }
 }
