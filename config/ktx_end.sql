@@ -84,6 +84,26 @@ CREATE TABLE DienNuoc (
     NgayDong DATE,                                  -- Ngày đóng hóa đơn
     FOREIGN KEY (MaPhong) REFERENCES Phong(MaPhong) -- Khóa ngoại liên kết tới bảng Phòng
 );
+-- Biểu đồ điện nước doanh thu
+DELIMITER //
+CREATE PROCEDURE GetDienNuocRevenueByMonth()
+BEGIN
+    SELECT 
+        DATE_FORMAT(ThangNam, '%Y-%m') AS Thang,       -- Lấy tháng và năm dưới dạng 'YYYY-MM'
+        SUM(SoTienDien) AS TongTienDien,               -- Tổng tiền điện trong tháng
+        SUM(SoTienNuoc) AS TongTienNuoc,               -- Tổng tiền nước trong tháng
+        SUM(SoTienDien + SoTienNuoc) AS TongDoanhThu,  -- Tổng doanh thu (điện + nước) trong tháng
+        SUM(TienConLai) AS TongTienConLai              -- Tổng tiền còn lại chưa thanh toán
+    FROM 
+        DienNuoc
+    GROUP BY 
+        DATE_FORMAT(ThangNam, '%Y-%m')                 -- Nhóm theo tháng và năm đã định dạng
+    ORDER BY 
+        Thang;                                         -- Sắp xếp theo tháng
+END //
+
+DELIMITER ;
+
 -- Hàm tạo ra mã điện nước tự động
 DELIMITER //
 
@@ -406,6 +426,46 @@ END //
 
 DELIMITER ;
 
+-- Truy vấn thanh toán dựa trên MaSinhVien
+DELIMITER //
+CREATE PROCEDURE get_payment_by_student(IN studentID VARCHAR(10))
+BEGIN
+    SELECT 
+        TT.MaHopDong,
+        TT.ThangNam,
+        TT.SoTien,
+        TT.NgayThanhToan,
+        TT.MaNhanVien
+    FROM 
+        TT_ThuePhong TT
+    JOIN ThuePhong TP ON TT.MaHopDong = TP.MaHopDong
+    JOIN SinhVien SV ON TP.MaSinhVien = SV.MaSinhVien
+    JOIN NhanVien NV ON TT.MaNhanVien = NV.MaNhanVien
+    WHERE 
+        SV.MaSinhVien = studentID;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER tao_tt_thuephong_khi_thuephong_moi
+AFTER INSERT ON ThuePhong
+FOR EACH ROW
+BEGIN
+    DECLARE SoTien FLOAT;
+    DECLARE ThangNam DATE;
+
+    -- Set default values
+    SET ThangNam = NEW.BatDau; -- Default to the start date of the contract
+    SET SoTien = NEW.Gia;      -- Set the payment amount to the rental price of the room
+
+    -- Insert a record into TT_ThuePhong for the new contract
+    INSERT INTO TT_ThuePhong (MaHopDong, ThangNam, SoTien, NgayThanhToan, MaNhanVien)
+    VALUES (NEW.MaHopDong, ThangNam, SoTien, NULL, 'CB000001');
+END //
+
+DELIMITER ;
 
 INSERT INTO Phong (MaPhong, TenPhong, DienTich, SoGiuong, GiaThue, PhongNam_Nu)
 VALUES
