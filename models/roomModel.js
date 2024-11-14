@@ -46,7 +46,7 @@ const Room = {
   },
 
   searchRoom: async function (maPhong, tenPhong) {
-    const sql = 'SELECT p.*, (p.SoGiuong - COUNT(tp.MaHopDong)) AS GiuongConLai FROM phong p LEFT JOIN thuephong tp ON p.MaPhong = tp.MaPhong WHERE p.MaPhong LIKE ? AND p.TenPhong LIKE ? GROUP BY p.MaPhong'
+    const sql = 'SELECT p.*, (p.SoGiuong - COUNT(tp.MaHopDong)) AS GiuongTrong FROM phong p LEFT JOIN thuephong tp ON p.MaPhong = tp.MaPhong WHERE p.MaPhong LIKE ? AND p.TenPhong LIKE ? GROUP BY p.MaPhong'
     const [result] = await db.query(sql, [`%${maPhong}%`, `%${tenPhong}%`])
     return result
   },
