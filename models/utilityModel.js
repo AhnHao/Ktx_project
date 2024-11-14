@@ -33,7 +33,18 @@ const Utility = {
         const sql = 'CALL ThanhToanHoaDonDienNuoc(?)';
         const [result] = await db.query(sql, [maDienNuoc]);
         return result;
-    }
+    },
+    getTotalUtility: async function () {
+        const sql = 'SELECT SUM(SoTienDien + SoTienNuoc) AS totalUtility FROM diennuoc'
+        const [result] = await db.query(sql)
+        return result[0].totalUtility
+    },
+    // Tính danh thu diện nước mỗi tháng
+    getUtilityRevenueByMonth: async function () {
+        const sql = 'CALL GetDienNuocRevenueByMonth()'
+        const [result] = await db.query(sql)
+        return result[0]
+    },
 }
 
 module.exports = Utility
