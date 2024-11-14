@@ -78,7 +78,7 @@
           <div class="row mb-3">
             <label for="maNhanVien" class="col-sm-4">Mã nhân viên</label>
             <div class="col-md-8">
-              <input type="text" id="maNhanVien" required name="maNhanVien" value="<% if(editing) { %><%= editEmployee.MaNhanVien %><% } %>">
+              <input type="text" id="maNhanVien" required name="maNhanVien" value="<% if(editing) { %><%= editEmployee.MaNhanVien %><% } %>" <% if(editing) { %>readonly<% } %>>
             </div>
           </div>
           <div class="row mb-3">
