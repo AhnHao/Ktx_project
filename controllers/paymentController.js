@@ -1,11 +1,13 @@
 const TT_ThuePhong = require('../models/TT_ThuePhong');
-
+const employeeModel = require('../models/EmployeesModel');
 exports.getAllPayments = async (req, res) => {
   try {
     const allPayments = await TT_ThuePhong.getAllPayments();
+    const allEmployeeId = await employeeModel.getEmployeeByID();
     res.render('payment/payment', {
       pageTitle: 'Tất cả thanh toán',
       allPayments,
+      allEmployeeId,
       editing: false,
       path: '/payment',
       searchPayment: null,
@@ -47,9 +49,13 @@ exports.deletePayment = async (req, res) => {
 };
 
 exports.updatePayment = async (req, res) => {
-  const { MDH, ThangNam, SoTien, NgayThanhToan, MaNhanVien } = req.body;
+  const MaHopDong = req.body.MDH;
+  const ThangNam = req.body.ThangNam;
+  const SoTien = req.body.SoTien;
+  const NgayThanhToan = req.body.NgayThanhToan;
+  const MaNhanVien = req.body.MaNhanVien;
   try {
-    await TT_ThuePhong.updatePaymentRecord(MDH, ThangNam, SoTien, NgayThanhToan, MaNhanVien);
+    await TT_ThuePhong.updatePaymentRecord(MaHopDong, ThangNam, SoTien, NgayThanhToan, MaNhanVien);
     req.flash('successMessage', 'Cập nhật thanh toán thành công!');
     res.redirect('/payment');
   } catch (error) {
@@ -64,6 +70,7 @@ exports.editPayment = async (req, res) => {
   const { MaHopDong } = req.params;
   try {
     const editTT_ThuePhong = await TT_ThuePhong.getPaymentById(MaHopDong);
+    const allEmployeeId = await employeeModel.getEmployeeByID();
     if (!editTT_ThuePhong) {
       req.flash('errorMessage', 'Không tìm thấy thông tin thanh toán');
       return res.redirect('/payment');
@@ -74,6 +81,7 @@ exports.editPayment = async (req, res) => {
       pageTitle: 'Chỉnh sửa thanh toán',
       allPayments,
       editTT_ThuePhong,
+      allEmployeeId,
       editing,
       path: '/payment',
       searchPayment: null,

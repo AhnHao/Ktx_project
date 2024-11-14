@@ -6,7 +6,7 @@ exports.getDashboard =  async (req, res, next) => {
     let errorMessage = req.flash('error')
     let successMessage = req.flash('success')
     const totalRooms = await Room.getTotalRoom()
-    const totalRentals = await Rental.getTotalRental()
+    const totalStudentsWithPayment = await Payment.getTotalStudentsWithPayment()
     // Danh thu phòng trọ
     const totalRevenue = await Payment.getTotalRevenue()
     // Doanh thu điện nước
@@ -16,7 +16,7 @@ exports.getDashboard =  async (req, res, next) => {
         pageTitle: 'Dashboard',
         path : '/dashboard',
         totalRooms: totalRooms,
-        totalRentals: totalRentals,
+        totalStudentsWithPayment: totalStudentsWithPayment,
         totalRevenue: totalRevenue,
         totalUtility: totalUtility,
         totalRevenueByMonth: totalRevenueByMonth,

@@ -1,16 +1,20 @@
 const Utility = require('../models/utilityModel')
-
+const Rental = require('../models/rentalModel')
+const Payment = require('../models/paymentModel')
 exports.getAllUtilities = async (req, res, next) => {
     let successMessage = req.flash('success')
     let errorMessage = req.flash('error')
     const allUtilities = await Utility.getAllUtilities()
+    const getRoomPayment = await Payment.getRoomPayment()
+    console.log(getRoomPayment)
     res.render('utility/utility', {
-      pageTitle: 'Utility',
-      path: '/utility',
-      allUtilities: allUtilities,
-      errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
-      successMessage: successMessage.length > 0 ? successMessage[0] : null,
-      editing: false
+        pageTitle: 'Utility',
+        path: '/utility',
+        allUtilities: allUtilities,
+        getRoomPayment: getRoomPayment,
+        errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
+        successMessage: successMessage.length > 0 ? successMessage[0] : null,
+        editing: false
     })
 }
 exports.addUtility = async (req, res, next) => {
@@ -34,6 +38,7 @@ exports.getEditUtility = async (req, res, next) => {
     const editmode = req.query.edit;
     const maDienNuoc = req.params.MaDienNuoc;
     try {
+        const getRoomPayment = await Payment.getRoomPayment()
         const editUtility = await Utility.getUtilityByMaDienNuoc(maDienNuoc);
         const allUtilities = await Utility.getAllUtilities();
         res.render('utility/utility', {
@@ -42,6 +47,7 @@ exports.getEditUtility = async (req, res, next) => {
             successMessage: null,
             errorMessage: null,
             allUtilities: allUtilities,
+            getRoomPayment: getRoomPayment,
             editUtility: editUtility[0],
             editing: editmode
         });

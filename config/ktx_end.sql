@@ -86,6 +86,7 @@ CREATE TABLE DienNuoc (
 );
 -- Biểu đồ điện nước doanh thu
 DELIMITER //
+
 CREATE PROCEDURE GetDienNuocRevenueByMonth()
 BEGIN
     SELECT 
@@ -96,6 +97,8 @@ BEGIN
         SUM(TienConLai) AS TongTienConLai              -- Tổng tiền còn lại chưa thanh toán
     FROM 
         DienNuoc
+    WHERE 
+        NgayDong IS NOT NULL                           -- Chỉ tính các bản ghi có NgayDong khác NULL
     GROUP BY 
         DATE_FORMAT(ThangNam, '%Y-%m')                 -- Nhóm theo tháng và năm đã định dạng
     ORDER BY 
@@ -103,6 +106,7 @@ BEGIN
 END //
 
 DELIMITER ;
+
 
 -- Hàm tạo ra mã điện nước tự động
 DELIMITER //
