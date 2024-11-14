@@ -80,7 +80,7 @@
           <div class="row mb-3">
             <label for="maSinhVien" class="col-sm-4">Mã sinh viên</label>
             <div class="col-md-8">
-              <input type="text" id="maSinhVien" required name="maSinhVien" value="<% if(editing) { %><%= editStudent.MaSinhVien %><% } %>">
+              <input type="text" id="maSinhVien" required name="maSinhVien" value="<% if(editing) { %><%= editStudent.MaSinhVien %><% } %>" <% if(editing) { %>readonly<% } %>>
             </div>
           </div>
           <div class="row mb-3">
@@ -98,7 +98,11 @@
           <div class="row mb-3">
             <label for="maLop" class="col-sm-4">Mã lớp</label>
             <div class="col-md-8">
-              <input type="text" id="maLop" required name="maLop" value="<% if(editing) { %><%= editStudent.MaLop %><% } %>">
+              <select id="maLop" required name="maLop">
+                <% allClassID.forEach(classId => { %>
+                  <option value="<%= classId.MaLop %>" <% if(editing && editStudent.MaLop === classId.Mal) { %>selected<% } %>><%= classId.MaLop %></option>
+                <% }) %>
+              </select>
             </div>
           </div>
           <div class="row mb-3">

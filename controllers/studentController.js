@@ -6,11 +6,13 @@ exports.getAllStudents = async (req, res, next) => {
   let errorMessage = req.flash('error')
   const allStudents = await Student.getAllStudents()
   const allClasses = await Class.getAllClasses()
+  const allClassID = await Class.getMaLop();
   res.render('student/student', {
     pageTitle: 'Danh Sách Sinh Viên',
     path: '/student',
     allStudents: allStudents,
     allClasses: allClasses,
+    allClassID: allClassID,
     errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
     successMessage: successMessage.length > 0 ? successMessage[0] : null,
     editing: false
@@ -55,11 +57,13 @@ exports.getEditStudent = async (req, res, next) => {
   try {
     const editStudent = await Student.getStudent(maSinhVien)
     const allStudents = await Student.getAllStudents()
+    const allClassID = await Class.getMaLop();
     res.render('student/student', {
       pageTitle: 'Chỉnh Sửa Thông Tin Sinh Viên',
       path: '/student',
       allStudents: allStudents,
       editStudent: editStudent[0],
+      allClassID: allClassID,
       editing: editMode,
       errorMessage: null,
       successMessage: null
