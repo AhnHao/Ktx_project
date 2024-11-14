@@ -148,10 +148,16 @@
               </div>
             </div>
             <div class="row mb-3">
-              <label for="MaNhanVien" class="col-sm-4">Mã nhân viên</label>
-              <div class="col-md-8">
-                <input type="text" id="MaNhanVien" name="MaNhanVien" required
-                  value="<%= editing ? editTT_ThuePhong.MaNhanVien : '' %>">
+              <label for="MaNhanVien" class="col-sm-4 ">Mã nhân viên</label>
+              <div class="col-sm-8">
+                <select id="MaNhanVien" required name="MaNhanVien" class="form-select">
+                  <option value="" selected>--Chọn mã nhân viên--</option>
+                  <% allEmployeeId.forEach(Employee => { %>
+                    <option value="<%= Employee.MaNhanVien %>" <%= editing && editTT_ThuePhong.MaNhanVien === Employee.MaNhanVien ? 'selected' : '' %>>
+                      <%= Employee.MaNhanVien %>
+                    </option>
+                  <% }) %>
+                </select>
               </div>
             </div>
             <button type="submit" class="btn btn-primary w-100">

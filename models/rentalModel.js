@@ -34,10 +34,6 @@ const Rental = {
         const [result] = await db.query(sql, [MaSinhVien])
         return result
     },
-    getTotalRental: async function () {
-        const sql = 'SELECT COUNT(*) AS totalRental FROM thuephong';
-        const [rows] = await db.query(sql);
-        return rows[0]?.totalRental || 0; // Trả về số lượng phòng đã thuê hoặc 0 nếu không có
-    }
+    
 }
 module.exports = Rental

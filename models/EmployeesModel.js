@@ -7,6 +7,12 @@ const Employees = {
     const [result] = await db.query(sql);
     return result;
   },
+  getEmployeeByID: async function () {
+    const sql = 'SELECT MaNhanVien FROM NhanVien'; // Giả sử bảng nhân viên là NhanVien
+    const [result] = await db.query(sql);
+    return result;
+  },
+
 
   // Lấy thông tin nhân viên theo mã nhân viên
   getEmployee: async function (maNhanVien) {

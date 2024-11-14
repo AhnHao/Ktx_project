@@ -93,9 +93,16 @@
             </div>
           </div>
           <div class="row mb-3">
-            <label for="maPhong" class="col-sm-4">Mã phòng</label>
-            <div class="col-md-8">
-              <input type="text" id="maPhong" required name="maPhong" value="<% if(editing) { %><%= editUtility.MaPhong %><% } %>">
+            <label for="maPhong" class="col-sm-4 ">Mã phòng</label>
+            <div class="col-sm-8">
+              <select id="maPhong" required name="maPhong">
+                <option value="" selected>--Chọn mã phòng--</option>
+                <% getRoomPayment.forEach(room => { %>
+                  <option value="<%= room.MaPhong %>" <%= editing && editUtility.MaPhong === room.MaPhong ? 'selected' : '' %>>
+                    <%= room.MaPhong %>
+                  </option>
+                <% }) %>
+              </select>
             </div>
           </div>
           <div class="row mb-3">

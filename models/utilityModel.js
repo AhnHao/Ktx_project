@@ -35,9 +35,9 @@ const Utility = {
         return result;
     },
     getTotalUtility: async function () {
-        const sql = 'SELECT SUM(SoTienDien + SoTienNuoc) AS totalUtility FROM diennuoc'
-        const [result] = await db.query(sql)
-        return result[0].totalUtility
+    const sql = 'SELECT SUM(SoTienDien + SoTienNuoc) AS totalUtility FROM diennuoc WHERE NgayDong IS NOT NULL'
+    const [result] = await db.query(sql)
+    return result[0].totalUtility
     },
     // Tính danh thu diện nước mỗi tháng
     getUtilityRevenueByMonth: async function () {
