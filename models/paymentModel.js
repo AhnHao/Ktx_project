@@ -21,6 +21,11 @@ const Payment = {
   },
 
   // ...existing code...
+  getTotalRevenue: async function () {
+    const sql = 'SELECT SUM(SoTien) AS totalRevenue FROM TT_ThuePhong';
+    const [result] = await db.query(sql);
+    return result[0].totalRevenue;
+  },
 };
 
 module.exports = Payment;

@@ -1,0 +1,185 @@
+<%- include('../layouts/head.ejs') %>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row bg-dark">
+      <div class="col-md-2 g-0 text-center">
+        <img 
+          src="/image/Logo_Dai_hoc_Can_Tho.svg.png" 
+          alt="logo"
+          height="75px"
+          class="mt-1"
+        >
+      </div>
+      <div class="col-md-10 g-0">
+        <div class="w-100 h-auto py-3 text-uppercase text-center text-white">
+          <h3>Hệ thống quản lý ký túc xá</h3>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <!-- sidebar -->
+      <div class="col-md-2 g-0">
+        <%- include('../layouts/sidebar.ejs') %>
+      </div>
+
+      <!-- main -->
+      <div class="col-md-10 border-end border-black" style="position: relative;">
+        <% if(errorMessage) { %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 0; z-index: 1000;">
+            <h4><%= errorMessage %></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+        <% if(successMessage) { %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 0; z-index: 1000;">
+            <h4><%= successMessage %></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
+        <h3 class="text-center my-2 text-uppercase p-3">Thống kê</h3>
+        
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary shadow-lg rounded-lg mb-4" style="max-width: 18rem;">
+                  <div class="card-header text-center font-weight-bold">Tổng số phòng</div>
+                  <div class="card-body text-center">
+                    <h5 class="card-title display-6"><%= totalRooms %></h5>  
+                  </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-primary shadow-lg rounded-lg mb-4" style="max-width: 18rem;">
+                  <div class="card-header text-center font-weight-bold">Số sinh viên thuê phòng</div>
+                  <div class="card-body text-center">
+                    <h5 class="card-title display-6"><%= totalRentals %></h5>  
+                  </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-primary shadow-lg rounded-lg mb-4" style="max-width: 18rem;">
+                  <div class="card-header text-center font-weight-bold">Doanh thu phòng</div>
+                  <div class="card-body text-center">
+                    <h6 class="card-title display-6"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalRevenue) %></h6>  
+                  </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-primary shadow-lg rounded-lg mb-4" style="max-width: 18rem;">
+                  <div class="card-header text-center font-weight-bold">Doanh thu điện nước</div>
+                  <div class="card-body text-center">
+                    <h6 class="card-title display-6"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalUtility) %></h6>  
+                  </div>
+                </div>
+            </div>
+              
+            
+        </div>
+        <div class="row bg-white p-2">
+          <div style="width: 70%; margin: auto;">
+            <canvas id="doanhThuDienNuocChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Giả sử dữ liệu JSON của bạn được nhúng từ EJS hoặc phía server
+    const jsonString = `<%- JSON.stringify(totalRevenueByMonth) %>`;
+    
+    // Phân tích chuỗi JSON thành đối tượng JavaScript
+    const revenueData = JSON.parse(jsonString);
+    
+    // Khởi tạo các mảng để lưu dữ liệu
+    const months = [];
+    const revenueDien = [];
+    const revenueNuoc = [];
+    const totalRevenue = [];
+    
+    // Lặp qua dữ liệu để lấy doanh thu của từng tháng
+    revenueData.forEach(data => {
+        months.push(data.Thang);
+        revenueDien.push(data.TongTienDien);
+        revenueNuoc.push(data.TongTienNuoc);
+        totalRevenue.push(data.TongDoanhThu);
+    });
+    
+    // Khởi tạo biểu đồ Chart.js
+    const ctx = document.getElementById('doanhThuDienNuocChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Doanh thu tiền điện (VND)',
+                    data: revenueDien,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',  // Màu xanh cho tiền điện
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Doanh thu tiền nước (VND)',
+                    data: revenueNuoc,
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',  // Màu xanh lục cho tiền nước
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Tổng doanh thu (VND)',
+                    data: totalRevenue,
+                    backgroundColor: 'rgba(255, 206, 86, 0.7)',  // Màu vàng cho tổng doanh thu
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Doanh thu điện nước theo tháng',
+                    font: {
+                        size: 30 // Kích thước chữ tiêu đề
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Tháng'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Doanh thu (VND)'
+                    }
+                }
+            }
+        }
+    });
+  </script>
+    
+    
+
+<%- include('../layouts/end.ejs') %>

@@ -54,6 +54,16 @@ const Room = {
     const sql = 'SELECT * FROM phong WHERE MaPhong = ?'
     const [result] = await db.query(sql, [maPhong])
     return result
+  },
+  getTotalRoom: async function () {
+    const sql = 'SELECT COUNT(*) AS totalRoom FROM phong'
+    const [result] = await db.query(sql)
+    return result[0].totalRoom
+  },
+  getTotalRevenue: async function () {
+    const sql = 'SELECT SUM(GiaThue) AS totalRevenue FROM thuephong'
+    const [result] = await db.query(sql)
+    return result[0].totalRevenue
   }
 }
 

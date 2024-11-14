@@ -67,7 +67,7 @@ exports.login = async (req, res, next) => {
     req.session.admin = admin
     return req.session.save(err => {
       req.flash('success', 'Đăng nhập thành công!')
-      res.redirect('/room')
+      res.redirect('/dashboard')
     })
   } catch (err) {
     console.log(err)
