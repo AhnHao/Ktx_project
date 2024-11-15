@@ -4,12 +4,14 @@ const Class = require('../models/classModel');
 
 exports.getAllClasses = async (req, res, next) => {
     let successMessage = req.flash('success');
+    let errorMessage = req.flash('error');
     const allClasses = await Class.getAllClasses()
     res.render('class/class', {
         pageTitle: 'Class',
         path: '/class',
         allClasses: allClasses,
         successMessage: successMessage.length > 0 ? successMessage[0] : null,
+        errorMessage: errorMessage.length > 0 ? errorMessage[0] : null,
         searchMaLopQuery: '',
         searchTenLopQuery: '',
         editing: false
@@ -65,7 +67,8 @@ exports.deleteClass = async (req, res, next) => {
       req.flash('success', 'Xóa lớp thành công!')
       res.redirect('/class')
     } catch(err) {
-      console.log(err)
+      req.flash('error', 'Không thể xóa lớp này khi đang có sinhvien!')
+      res.redirect('/class')
     }
 }
 exports.searchClass = async (req, res, next) => {

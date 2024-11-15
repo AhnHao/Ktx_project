@@ -79,6 +79,16 @@ const TT_ThuePhong = {
       throw error;
     }
   },
+  getTT_ThuePhongByMaHopDong: async function (contractID) {
+    try {
+      const sql = 'SELECT * FROM TT_ThuePhong WHERE MaHopDong = ?';
+      const [result] = await db.query(sql, [contractID]);
+      return result[0];
+    } catch (error) {
+      console.error('Error fetching payment by MaHopDong:', error);
+      throw error;
+    }
+  }
 };
 
 module.exports = TT_ThuePhong;
