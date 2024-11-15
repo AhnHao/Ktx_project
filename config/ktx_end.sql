@@ -221,6 +221,30 @@ BEGIN
 END //
 
 DELIMITER ;
+-- Cập nhật hợp đồng thuê phòng
+DELIMITER //
+
+CREATE PROCEDURE UpdateRental(
+    IN p_MaHopDong VARCHAR(50),
+    IN p_MaSinhVien VARCHAR(50),
+    IN p_MaPhong VARCHAR(50),
+    IN p_BatDau DATE,
+    IN p_KetThuc DATE,
+    IN p_Gia DECIMAL(10, 2)
+)
+BEGIN
+    UPDATE ThuePhong
+    SET
+        MaSinhVien = p_MaSinhVien,
+        MaPhong = p_MaPhong,
+        BatDau = p_BatDau,
+        KetThuc = p_KetThuc,
+        Gia = p_Gia
+    WHERE
+        MaHopDong = p_MaHopDong;
+END //
+
+DELIMITER ;
 -- Xoá hợp đồng thuê phòng
 DELIMITER //
 
@@ -593,5 +617,7 @@ VALUES
 ('HD000004', 'AA01104', '2023-11-01', 110000, 90000, 200000, NULL),
 ('HD000005', 'CA01001', '2023-11-01', 125000, 75000, 200000, NULL),
 ('HD000006', 'CA01002', '2023-11-01', 100000, 95000, 195000, NULL);
+
+
 
 

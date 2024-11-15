@@ -31,6 +31,12 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         <% } %>
+        <% if(errorMessage) { %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 0; z-index: 1000;">
+            <h4><%= errorMessage %></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% } %>
         <h3 class="text-center my-2 text-uppercase">Danh sách lớp</h3>
         <div class="border border-black" style="max-height: 80vh; overflow-y: auto;">
             <table class="table table-hover table-bordered text-center">

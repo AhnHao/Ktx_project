@@ -6,7 +6,6 @@ exports.getAllUtilities = async (req, res, next) => {
     let errorMessage = req.flash('error')
     const allUtilities = await Utility.getAllUtilities()
     const getRoomPayment = await Payment.getRoomPayment()
-    console.log(getRoomPayment)
     res.render('utility/utility', {
         pageTitle: 'Utility',
         path: '/utility',

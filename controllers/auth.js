@@ -8,8 +8,8 @@ exports.getLogin = (req, res, next) => {
   res.render('auth/login', {
     pageTitle: 'Login',
     path: '/login',
-    errorMessage: errormessage[0]||null,
-    successMessage: successmessage[0]||null,
+    errorMessage: errormessage[0]||'',
+    successMessage: successmessage[0]||'',
     oldInput: {
       email: '',
       password: ''
@@ -21,13 +21,13 @@ exports.getLogin = (req, res, next) => {
 exports.login = async (req, res, next) => {
   const email = req.body.email
   const password = req.body.password
-  const errors = validationResult(req)
-
+  const errors = validationResult(req)  
   if (!errors.isEmpty()) {
     return res.status(422).render('auth/login', {
       pageTitle: 'Login',
       path: '/login',
       errorMessage: errors.array()[0].msg,
+      successMessage: '',
       oldInput: {
         email: email,
         password: password
@@ -43,6 +43,7 @@ exports.login = async (req, res, next) => {
         pageTitle: 'Login',
         path: '/login',
         errorMessage: 'Tài khoản không tồn tại',
+        successMessage: '',
         oldInput: {
           email: email,
           password: password
@@ -57,6 +58,7 @@ exports.login = async (req, res, next) => {
         pageTitle: 'Login',
         path: '/login',
         errorMessage: 'Mật khẩu không chính xác',
+        successMessage: '',
         oldInput: { email: email, password: password },
         validationErrors: []
       })

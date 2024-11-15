@@ -2,6 +2,7 @@ const Room = require('../models/roomModel')
 const Rental = require('../models/rentalModel')
 const Utility = require('../models/utilityModel')
 const Class = require('../models/classModel')
+const TT_ThuePhong = require('../models/TT_ThuePhong')
 exports.getAllRooms = async (req, res, next) => {
   let successMessage = req.flash('success')
   let errorMessage = req.flash('error')
@@ -120,14 +121,17 @@ exports.getRoomInfo = async (req, res, next) => {
       req.flash('error', 'Bạn chưa thuê phòng nào!');
       return res.redirect('/loginstudent');
     }
+    const payment = await TT_ThuePhong.getTT_ThuePhongByMaHopDong(rental[0].MaHopDong);
+    if(payment.NgayThanhToan == null){
+      req.flash('error', 'Bạn chưa thanh toán phòng!');
+      return res.redirect('/loginstudent');
+    }
     const room = await Room.getRoomByMaPhong(rental[0].MaPhong);
     const utilities = await Utility.getUtilityByMaPhong(rental[0].MaPhong);
     const className = await Class.getClassName(student.MaLop);
     res.render('room/roominfo', {
       pageTitle: 'Room Info',
       path: '/roominfo',
-      errorMessage: null,
-      successMessage: null,
       student: student,
       className: className,
       room: room[0],

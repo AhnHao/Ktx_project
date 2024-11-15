@@ -45,6 +45,11 @@ const Class = {
         const sql = 'SELECT MaLop FROM Lop';
         const [result] = await db.query(sql);
         return result;
+    },
+    checklop: async function (maLop) {
+        const sql = 'SELECT * FROM Lop WHERE MaLop = ?';
+        const [result] = await db.query(sql, [maLop]);
+        return result.length > 0 ? true : false;
     }
     
 }
